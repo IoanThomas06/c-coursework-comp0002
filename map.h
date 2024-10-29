@@ -1,9 +1,22 @@
+#include <stddef.h>
+
 typedef struct Map
 {
-    int xSize;
-    int ySize;
-    int *mapMatrix[];
+    size_t rowSize;
+    size_t columnSize;
+    int *mapMatrix;
 } Map;
 
-Map initialiseMap(Map map, int xSize, int ySize, void (*mapGenerationFunction)(Map *map));
-int getPositionState(int x, int y);
+// Map utility functions.
+
+Map *initialiseMap(size_t rowSize, size_t columnSize,
+                   void (*mapGenerationFunction)(Map *));
+size_t getRowSize(Map *map);
+size_t getColumnSize(Map *map);
+void setMapPositionValue(Map *map, int row, int column, int value);
+int isPositionEmpty(Map *map, int row, int column);
+
+// Map generation functions.
+
+void basicMap(Map *map);
+void otherMap(Map *map);

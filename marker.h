@@ -7,5 +7,7 @@ typedef struct Marker
     int isHome;
 } Marker;
 
-Marker initialiseMarker(Position initialPosition, int isHome);
-int isHomeMarker(Marker marker);
+Marker *initialiseMarker(Position initialPosition, int isHome);
+Position getPosition(Marker *marker);
+int isPlacedMarker(Marker *marker);
+int isHomeMarker(Marker *marker);

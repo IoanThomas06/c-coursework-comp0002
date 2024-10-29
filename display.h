@@ -1,6 +1,17 @@
 #include "marker.h"
 #include "robot.h"
 #include "map.h"
+#include <stddef.h>
 
-void drawBackground(Map *map);
-void updateForeground(Robot *robot, Marker *markers[], int numberOfMarkers);
+typedef struct Display
+{
+    size_t xSize;
+    size_t ySize;
+    size_t pixelWidthOfGridSquare;
+} Display;
+
+Display *initialiseDisplay(size_t xSize, size_t ySize,
+                           size_t pixelWidthOfGridSquare);
+void drawBackground(Display *display, Map *map);
+void updateForeground(Display *display, Robot *robot, Marker *markers[],
+                      int numberOfMarkers);
