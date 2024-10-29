@@ -1,14 +1,16 @@
 #include "map.h"
+#include "allocations.h"
 #include <stddef.h>
 #include <stdlib.h>
 
 Map *initialiseMap(size_t rowSize, size_t columnSize,
                    void (*mapGenerationFunction)(Map *))
 {
-    Map *map = (Map *)malloc(sizeof(Map));
+    Map *map = (Map *)checkedMalloc(sizeof(Map), "Map");
     map->rowSize = rowSize;
     map->columnSize = columnSize;
-    map->mapMatrix = (int *)calloc(rowSize * columnSize, sizeof(int));
+    map->mapMatrix = (int *)checkedCalloc(rowSize * columnSize, sizeof(int),
+                                          "'mapMatrix' in Map");
     mapGenerationFunction(map);
     return map;
 }

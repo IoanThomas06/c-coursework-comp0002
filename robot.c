@@ -2,13 +2,16 @@
 #include "position.h"
 #include "marker.h"
 #include "map.h"
+#include "allocations.h"
 #include <stdlib.h>
 
 Robot *initialiseRobot(Position initialPosition, int initialDirection,
                        int numberOfMarkers)
 {
-    Robot *robot = (Robot *)malloc(sizeof(Robot));
-    Marker **markers = (Marker **)calloc(numberOfMarkers, sizeof(Marker *));
+    Robot *robot = (Robot *)checkedMalloc(sizeof(Robot), "Robot");
+    Marker **markers = (Marker **)checkedCalloc(numberOfMarkers,
+                                                sizeof(Marker *),
+                                                "'markers' in Robot");
     robot->position = initialPosition;
     robot->neswDirection = initialDirection;
     robot->markerCount = 0;
