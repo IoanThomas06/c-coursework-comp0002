@@ -11,7 +11,7 @@ typedef struct Display
 } Display;
 
 Display *initialiseDisplay(size_t xSize, size_t ySize,
-                           size_t pixelWidthOfGridSquare);
+                           int pixelWidthOfGridSquare);
 void drawBackground(Display *display, Map *map);
 void updateForeground(Display *display, Robot *robot, Marker *markers[],
                       int numberOfMarkers);

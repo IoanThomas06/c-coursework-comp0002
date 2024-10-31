@@ -25,12 +25,19 @@ size_t getColumnSize(Map *map)
     return map->columnSize;
 }
 
-void setMapPositionValue(Map *map, int row, int column, int value)
+static int mapToArrayRowCoordinates(Map *map, size_t row)
 {
-    map->mapMatrix[row * getRowSize(map) + column] = value;
+    return getRowSize(map) - row - 1;
 }
 
-int isPositionEmpty(Map *map, int row, int column)
+void setMapPositionValue(Map *map, size_t row, size_t column, int value)
 {
-    return map->mapMatrix[row * getRowSize(map) + column];
+    map->mapMatrix[mapToArrayRowCoordinates(map, row) * getRowSize(map) +
+                   column] = value;
+}
+
+int isMapPositionEmpty(Map *map, size_t row, size_t column)
+{
+    return map->mapMatrix[mapToArrayRowCoordinates(map, row) * getRowSize(map) +
+                          column];
 }
