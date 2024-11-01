@@ -29,8 +29,7 @@ DirectionVector getDirectionVector(Robot *robot)
         return (DirectionVector){1, 0};
     case 2:
         return (DirectionVector){0, -1};
-    // Default case only occurs for values: 3.
-    default:
+    case 3:
         return (DirectionVector){-1, 0};
     }
 }
@@ -105,16 +104,17 @@ void pickUpMarker(Robot *robot, Marker *markers[], size_t numberOfMarkers)
     }
 }
 
-void dropMarker(Robot *robot, Marker *marker, Marker *markers[],
+void dropMarker(Robot *robot, Marker *markers[],
                 size_t numberOfMarkers)
 {
     for (size_t i = 0; i < numberOfMarkers; i++)
     {
-        if (marker == markers[i])
+        if (markers[i])
         {
-            drop(marker, robot->position);
+            drop(markers[i], robot->position);
             robot->markers[i] = NULL;
             robot->markerCount--;
+            break;
         }
     }
 }

@@ -37,6 +37,6 @@ void right(Robot *);
 int atMarker(Robot *, Marker *[], size_t);
 int canMoveForward(Robot *, Map *);
 void pickUpMarker(Robot *, Marker *[], size_t);
-void dropMarker(Robot *, Marker *, Marker *[], size_t);
+void dropMarker(Robot *, Marker *[], size_t);
 int markerCount(Robot *);
 int isAtHome(Robot *, Marker *[], size_t);
