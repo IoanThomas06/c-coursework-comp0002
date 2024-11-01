@@ -37,12 +37,12 @@ DirectionVector getDirectionVector(Robot *robot)
 
 Position addDirectionToPosition(Position position, DirectionVector direction)
 {
-    position.y += direction.y;
     position.x += direction.x;
+    position.y += direction.y;
     return position;
 }
 
-static void makeTurn(Robot *robot, int relativeDirection)
+static void turn(Robot *robot, int relativeDirection)
 {
     // Accounts for -1 and 4 as values by circling from 'West' back to 'North'
     // and vice versa.
@@ -57,10 +57,82 @@ void forward(Robot *robot)
 
 void left(Robot *robot)
 {
-    makeTurn(robot, -1);
+    turn(robot, -1);
 }
 
 void right(Robot *robot)
 {
-    makeTurn(robot, 1);
+    turn(robot, 1);
+}
+
+int atMarker(Robot *robot, Marker *markers[], size_t numberOfMarkers)
+{
+    for (size_t i = 0; i < numberOfMarkers; i++)
+    {
+        if (comparePositionValues(robot->position, markers[i]->position))
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int canMoveForward(Robot *robot, Map *map)
+{
+    Position nextPosition = addDirectionToPosition(robot->position,
+                                                   getDirectionVector(robot));
+    if (nextPosition.x == -1 ||
+        nextPosition.x == getColumnSize(map) ||
+        nextPosition.y == -1 ||
+        nextPosition.y == getRowSize(map) ||
+        !isMapPositionEmpty(map, nextPosition))
+    {
+        return 0;
+    }
+    return 1;
+}
+
+void pickUpMarker(Robot *robot, Marker *markers[], size_t numberOfMarkers)
+{
+    for (size_t i = 0; i < numberOfMarkers; i++)
+    {
+        if (comparePositionValues(robot->position, markers[i]->position))
+        {
+            pickUp(markers[i]);
+            robot->markers[i] = markers[i];
+            robot->markerCount++;
+        }
+    }
+}
+
+void dropMarker(Robot *robot, Marker *marker, Marker *markers[],
+                size_t numberOfMarkers)
+{
+    for (size_t i = 0; i < numberOfMarkers; i++)
+    {
+        if (marker == markers[i])
+        {
+            drop(marker, robot->position);
+            robot->markers[i] = NULL;
+            robot->markerCount--;
+        }
+    }
+}
+
+int markerCount(Robot *robot)
+{
+    return robot->markerCount;
+}
+
+int isAtHome(Robot *robot, Marker *markers[], size_t numberOfMarkers)
+{
+    for (size_t i = 0; i < numberOfMarkers; i++)
+    {
+        if (isHomeMarker(markers[i]) &&
+            comparePositionValues(robot->position, markers[i]->position))
+        {
+            return 1;
+        }
+    }
+    return 0;
 }

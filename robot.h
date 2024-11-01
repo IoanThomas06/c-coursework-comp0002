@@ -25,20 +25,18 @@ typedef struct Robot
 
 // Robot utility declarations.
 
-Robot *initialiseRobot(Position initialPosition, int initialDirection,
-                       size_t numberOfMarkers);
-DirectionVector getDirectionVector(Robot *robot);
-Position addDirectionToPosition(Position position,
-                                DirectionVector direction);
+Robot *initialiseRobot(Position, int, size_t);
+DirectionVector getDirectionVector(Robot *);
+Position addDirectionToPosition(Position, DirectionVector);
 
 // Robot control declarations.
 
-void forward(Robot *robot);
-void left(Robot *robot);
-void right(Robot *robot);
-int atMarker(Robot *robot, Marker *markers[], size_t numberOfMarkers);
-int canMoveForward(Robot *robot, Map *map);
-void pickUpMarker(Robot *robot, Marker *markers[], size_t numberOfMarkers);
-void dropMarker(Robot *robot, Marker *marker);
-int markerCount(Robot *robot);
-int isAtHome(Robot *robot, Marker *markers[], size_t numberOfMarkers);
+void forward(Robot *);
+void left(Robot *);
+void right(Robot *);
+int atMarker(Robot *, Marker *[], size_t);
+int canMoveForward(Robot *, Map *);
+void pickUpMarker(Robot *, Marker *[], size_t);
+void dropMarker(Robot *, Marker *, Marker *[], size_t);
+int markerCount(Robot *);
+int isAtHome(Robot *, Marker *[], size_t);

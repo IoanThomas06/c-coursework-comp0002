@@ -1,5 +1,8 @@
 #include "position.h"
 
+#ifndef MARKER
+#define MARKER
+
 typedef struct Marker
 {
     Position position;
@@ -7,7 +10,11 @@ typedef struct Marker
     int isHome;
 } Marker;
 
-Marker *initialiseMarker(Position initialPosition, int isHome);
-Position getPosition(Marker *marker);
-int isPlacedMarker(Marker *marker);
-int isHomeMarker(Marker *marker);
+Marker *initialiseMarker(Position, int);
+Position getMarkerPosition(Marker *);
+void pickUp(Marker *);
+void drop(Marker *, Position);
+int isPlacedMarker(Marker *);
+int isHomeMarker(Marker *);
+
+#endif

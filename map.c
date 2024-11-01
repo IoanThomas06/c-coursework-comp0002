@@ -1,4 +1,5 @@
 #include "map.h"
+#include "position.h"
 #include "allocations.h"
 #include <stddef.h>
 #include <stdlib.h>
@@ -25,19 +26,23 @@ size_t getColumnSize(Map *map)
     return map->columnSize;
 }
 
-static int mapToArrayRowCoordinates(Map *map, size_t row)
+static int convertMapRowToArray(Map *map, size_t row)
 {
     return getRowSize(map) - row - 1;
 }
 
-void setMapPositionValue(Map *map, size_t row, size_t column, int value)
+void setMapPositionValue(Map *map, Position position, int value)
 {
-    map->mapMatrix[mapToArrayRowCoordinates(map, row) * getRowSize(map) +
-                   column] = value;
+    map->mapMatrix[convertMapRowToArray(map, position.y) * getRowSize(map) +
+                   position.x] = value;
 }
 
-int isMapPositionEmpty(Map *map, size_t row, size_t column)
+int isMapPositionEmpty(Map *map, Position position)
 {
-    return map->mapMatrix[mapToArrayRowCoordinates(map, row) * getRowSize(map) +
-                          column];
+    // Use of calloc in initialiseMap means that map positions are initialised
+    // to 0, due to how the map generations will be implemented, it is most
+    // convenient that 0 represents an obstacle.
+    return map->mapMatrix[convertMapRowToArray(map, position.y) *
+                              getRowSize(map) +
+                          position.x];
 }

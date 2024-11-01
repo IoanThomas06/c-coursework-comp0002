@@ -3,15 +3,18 @@
 #include "map.h"
 #include <stddef.h>
 
+#ifndef DISPLAY
+#define DISPLAY
+
 typedef struct Display
 {
-    size_t xSize;
-    size_t ySize;
+    size_t rowCount;
+    size_t columnCount;
     size_t pixelWidthOfGridSquare;
 } Display;
 
-Display *initialiseDisplay(size_t xSize, size_t ySize,
-                           int pixelWidthOfGridSquare);
-void drawBackground(Display *display, Map *map);
-void updateForeground(Display *display, Robot *robot, Marker *markers[],
-                      int numberOfMarkers);
+Display *initialiseDisplay(size_t, size_t, size_t);
+void drawBackground(Display *, Map *);
+void updateForeground(Display *, Robot *, Marker *[], int);
+
+#endif

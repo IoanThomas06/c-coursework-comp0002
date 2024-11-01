@@ -1,4 +1,8 @@
+#include "position.h"
 #include <stddef.h>
+
+#ifndef MAP
+#define MAP
 
 typedef struct Map
 {
@@ -9,14 +13,15 @@ typedef struct Map
 
 // Map utility functions.
 
-Map *initialiseMap(size_t rowSize, size_t columnSize,
-                   void (*mapGenerationFunction)(Map *));
-size_t getRowSize(Map *map);
-size_t getColumnSize(Map *map);
-void setMapPositionValue(Map *map, size_t row, size_t column, int value);
-int isMapPositionEmpty(Map *map, size_t row, size_t column);
+Map *initialiseMap(size_t, size_t, void (*)(Map *));
+size_t getRowSize(Map *);
+size_t getColumnSize(Map *);
+void setMapPositionValue(Map *, Position, int);
+int isMapPositionEmpty(Map *, Position);
 
 // Map generation functions.
 
-void generateBasicMap(Map *map);
-void generateOtherMap(Map *map);
+void generateBasicMap(Map *);
+void generateOtherMap(Map *);
+
+#endif
