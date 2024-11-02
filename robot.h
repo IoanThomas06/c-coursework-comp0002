@@ -2,6 +2,9 @@
 #include "marker.h"
 #include "map.h"
 
+#ifndef ROBOT_H
+#define ROBOT_H
+
 /*
     The members represent the directional displacement of moving one unit in the
     current direction.
@@ -18,6 +21,8 @@ typedef struct DirectionVector
 typedef struct Robot
 {
     Position position;
+    // Maps North through to West directions to the values 0 through to 3
+    // respectively.
     int neswDirection;
     int markerCount;
     Marker **markers;
@@ -28,6 +33,7 @@ typedef struct Robot
 Robot *initialiseRobot(Position, int, size_t);
 DirectionVector getDirectionVector(Robot *);
 Position addDirectionToPosition(Position, DirectionVector);
+int getRotationalOffset(Robot *);
 
 // Robot control declarations.
 
@@ -40,3 +46,5 @@ void pickUpMarker(Robot *, Marker *[], size_t);
 void dropMarker(Robot *, Marker *[], size_t);
 int markerCount(Robot *);
 int isAtHome(Robot *, Marker *[], size_t);
+
+#endif

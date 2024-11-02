@@ -1,8 +1,8 @@
 #include "position.h"
 #include <stddef.h>
 
-#ifndef MAP
-#define MAP
+#ifndef MAP_H
+#define MAP_H
 
 typedef struct Map
 {

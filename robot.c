@@ -41,11 +41,21 @@ Position addDirectionToPosition(Position position, DirectionVector direction)
     return position;
 }
 
+int getRotationalOffset(Robot *robot)
+{
+    return robot->neswDirection;
+}
+
 static void turn(Robot *robot, int relativeDirection)
 {
-    // Accounts for -1 and 4 as values by circling from 'West' back to 'North'
-    // and vice versa.
-    robot->neswDirection = (robot->neswDirection + relativeDirection + 4) % 4;
+    /*
+        Accounts for -1 and 4 as nesw values by circling from 'West' back to
+        'North' and vice versa.
+        Also handles any < -1 or > 4 if the argument was not -1 or 1.
+    */
+    robot->neswDirection = ((robot->neswDirection + relativeDirection) % 4 +
+                            4) %
+                           4;
 }
 
 void forward(Robot *robot)

@@ -1,7 +1,7 @@
 #include "position.h"
 
-#ifndef MARKER
-#define MARKER
+#ifndef MARKER_H
+#define MARKER_H
 
 typedef struct Marker
 {
