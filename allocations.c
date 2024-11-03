@@ -11,6 +11,7 @@ static void raiseAllocationError(char errorMessage[])
 void *checkedMalloc(size_t size, char errorMessage[])
 {
     void *pointer = malloc(size);
+
     if (pointer)
     {
         return pointer;
@@ -21,6 +22,7 @@ void *checkedMalloc(size_t size, char errorMessage[])
 void *checkedCalloc(size_t numberOfObjects, size_t size, char errorMessage[])
 {
     void *pointer = calloc(numberOfObjects, size);
+
     if (pointer)
     {
         return pointer;

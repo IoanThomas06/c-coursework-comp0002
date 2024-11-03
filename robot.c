@@ -9,14 +9,23 @@ Robot *initialiseRobot(Position initialPosition, int initialDirection,
                        size_t numberOfMarkers)
 {
     Robot *robot = (Robot *)checkedMalloc(sizeof(Robot), "Robot");
+
     Marker **markers = (Marker **)checkedCalloc(numberOfMarkers,
                                                 sizeof(Marker *),
                                                 "'markers' in Robot");
+
     robot->position = initialPosition;
     robot->neswDirection = initialDirection;
     robot->markerCount = 0;
     robot->markers = markers;
+
     return robot;
+}
+
+void deallocateRobot(Robot *robot)
+{
+    free(robot->markers);
+    free(robot);
 }
 
 DirectionVector getDirectionVector(Robot *robot)
@@ -38,6 +47,7 @@ Position addDirectionToPosition(Position position, DirectionVector direction)
 {
     position.x += direction.x;
     position.y += direction.y;
+
     return position;
 }
 
@@ -90,6 +100,7 @@ int canMoveForward(Robot *robot, Map *map)
 {
     Position nextPosition = addDirectionToPosition(robot->position,
                                                    getDirectionVector(robot));
+
     if (nextPosition.x == -1 ||
         nextPosition.x == getColumnSize(map) ||
         nextPosition.y == -1 ||
@@ -117,15 +128,15 @@ void pickUpMarker(Robot *robot, Marker *markers[], size_t numberOfMarkers)
 void dropMarker(Robot *robot, Marker *markers[],
                 size_t numberOfMarkers)
 {
-    for (size_t i = 0; i < numberOfMarkers; i++)
+    size_t i = 0;
+    while (!markers[i] && ++i < numberOfMarkers)
+        ;
+
+    if (i != numberOfMarkers)
     {
-        if (markers[i])
-        {
-            drop(markers[i], robot->position);
-            robot->markers[i] = NULL;
-            robot->markerCount--;
-            break;
-        }
+        drop(markers[i], robot->position);
+        robot->markers[i] = NULL;
+        robot->markerCount--;
     }
 }
 

@@ -7,9 +7,14 @@
 #include "./drawapp/graphics.h"
 #include <stddef.h>
 
-// take these out, put as functions operating on display, and add borderwidth property to display
-#define BORDER_WIDTH 1
 #define ROBOT_VERTICES 3
+
+/*
+    Some frequently used expressions.
+    Require a local scope variable 'Display *display'.
+*/
+
+#define BORDER_WIDTH display->borderWidth
 #define SQUARE_WIDTH display->pixelWidthOfGridSquare
 #define WINDOW_WIDTH (display->columnCount + 2 * BORDER_WIDTH) * SQUARE_WIDTH
 #define WINDOW_HEIGHT (display->rowCount + 2 * BORDER_WIDTH) * SQUARE_WIDTH
@@ -19,8 +24,9 @@
 /*
     Used to decouple from the dependance on drawapp interface.
     Subsequent drawing implementations abstract the need to program to drawapp
-    implementation.
+    interface.
 */
+
 static int formatYCoordinate(Display *display, int yPoint)
 {
     return WINDOW_HEIGHT - yPoint;
@@ -38,13 +44,40 @@ static void fillRectOnDisplay(Display *display, int x1, int y1, int width,
     fillRect(x1, formatYCoordinate(display, y1) - height, width, height);
 }
 
-static void fillPolygonOnDisplay(Display *display, size_t count, int x[], int y[])
+static void fillPolygonOnDisplay(Display *display, size_t count, int x[],
+                                 int y[])
 {
     for (size_t i = 0; i < count; i++)
     {
         y[i] = formatYCoordinate(display, y[i]);
     }
+
     fillPolygon(count, x, y);
+}
+
+static void setDisplayWindowSize(Display *display)
+{
+    setWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+}
+
+static void editDisplayForeground()
+{
+    foreground();
+}
+
+static void editDisplayBackground()
+{
+    background();
+}
+
+static void setDisplayDrawColour(int red, int green, int blue)
+{
+    setRGBColour(red, green, blue);
+}
+
+static void delayDisplayUpdate(int milliseconds)
+{
+    sleep(milliseconds);
 }
 
 // Static background functions.
@@ -87,6 +120,7 @@ static void drawObstacles(Display *display, Map *map)
              column++)
         {
             Position position = {column - BORDER_WIDTH, row - BORDER_WIDTH};
+
             if (row < BORDER_WIDTH ||
                 row >= getRowSize(map) + BORDER_WIDTH ||
                 column < BORDER_WIDTH ||
@@ -108,14 +142,15 @@ static void swapXY(size_t i, int xPoints[], int yPoints[])
     yPoints[i] = xPoints[i];
 }
 
-static void rotatePointSets(int numberOfRotations, int xPoints[],
-                            int yPoints[])
+static void rotatePointSets(int numberOfRotations, int numberOfPoints,
+                            int xPoints[], int yPoints[])
 {
 
     // Handles any values < -1 or > 4 of rotation amount.
     // i.e. rotation amount will be 0, 1, 2, or 3.
     numberOfRotations = ((numberOfRotations % 4) + 4) % 4;
-    for (int i = 0; i < ROBOT_VERTICES; i++)
+
+    for (int i = 0; i < numberOfPoints; i++)
     {
         if (numberOfRotations > 1)
         {
@@ -131,19 +166,23 @@ static void rotatePointSets(int numberOfRotations, int xPoints[],
 static void generateTriangleRobotPoints(int squareWidth, int xPoints[],
                                         int yPoints[])
 {
-    for (size_t i = 0; i < ROBOT_VERTICES; i++)
+    for (size_t i = 0; i < 3; i++)
     {
         xPoints[i] = i * squareWidth / 3;
     }
+
     yPoints[0] = yPoints[2] = 0;
     yPoints[1] = squareWidth / 2;
 }
 
-static void generateRobotPointSet(Robot *robot, int squareWidth, int xPoints[],
-                                  int yPoints[])
+static void generateRobotPointSet(Display *display, Robot *robot,
+                                  int squareWidth, int xPoints[], int yPoints[])
 {
     generateTriangleRobotPoints(squareWidth, xPoints, yPoints);
-    rotatePointSets(getRotationalOffset(robot), xPoints, yPoints);
+
+    rotatePointSets(ROBOT_VERTICES, getRotationalOffset(robot), xPoints,
+                    yPoints);
+
     for (size_t i = 0; i < ROBOT_VERTICES; i++)
     {
         xPoints[i] += (robot->position.y + BORDER_WIDTH) * squareWidth;
@@ -155,7 +194,9 @@ static void drawRobot(Display *display, Robot *robot)
 {
     int xPoints[ROBOT_VERTICES];
     int yPoints[ROBOT_VERTICES];
-    generateRobotPointSet(robot, SQUARE_WIDTH, xPoints, yPoints);
+
+    generateRobotPointSet(display, robot, SQUARE_WIDTH, xPoints, yPoints);
+
     fillPolygonOnDisplay(display, 3, xPoints, yPoints);
 }
 
@@ -172,34 +213,47 @@ static void drawMarker(Display *display, Marker *marker)
 // Header function definitions.
 
 Display *initialiseDisplay(size_t rowCount, size_t columnCount,
-                           size_t pixelWidthOfGridSquare)
+                           size_t pixelWidthOfGridSquare, size_t borderWidth)
 {
     Display *display = (Display *)checkedMalloc(sizeof(Display), "Display");
+
     display->rowCount = rowCount;
     display->columnCount = columnCount;
     display->pixelWidthOfGridSquare = pixelWidthOfGridSquare;
-    setWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+    display->borderWidth = borderWidth;
+
+    setDisplayWindowSize(display);
+
     return display;
+}
+
+void deallocateDisplay(Display *display)
+{
+    free(display);
 }
 
 void drawBackground(Display *display, Map *map)
 {
-    background();
-    setRGBColour(0x00, 0x00, 0x00);
+    editDisplayBackground();
+
+    setDisplayDrawColour(0x00, 0x00, 0x00);
     drawGrid(display, map);
-    setRGBColour(0xFF, 0x00, 0x00);
+
+    setDisplayDrawColour(0xFF, 0x00, 0x00);
     drawObstacles(display, map);
 }
 
 void updateForeground(Display *display, Robot *robot, Marker *markers[],
                       int numberOfMarkers)
 {
-    sleep(500);
-    foreground();
+    delayDisplayUpdate(500);
+    editDisplayForeground();
     clear();
-    setRGBColour(0x00, 0xFF, 0x00);
+
+    setDisplayDrawColour(0x00, 0xFF, 0x00);
     drawRobot(display, robot);
-    setRGBColour(0x00, 0x00, 0xFF);
+
+    setDisplayDrawColour(0x00, 0x00, 0xFF);
     for (size_t i = 0; i < numberOfMarkers; i++)
     {
         drawMarker(display, markers[i]);

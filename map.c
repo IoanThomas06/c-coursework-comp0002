@@ -8,12 +8,21 @@ Map *initialiseMap(size_t rowSize, size_t columnSize,
                    void (*mapGenerationFunction)(Map *))
 {
     Map *map = (Map *)checkedMalloc(sizeof(Map), "Map");
+
     map->rowSize = rowSize;
     map->columnSize = columnSize;
     map->mapMatrix = (int *)checkedCalloc(rowSize * columnSize, sizeof(int),
                                           "'mapMatrix' in Map");
+
     mapGenerationFunction(map);
+
     return map;
+}
+
+void deallocateMap(Map *map)
+{
+    free(map->mapMatrix);
+    free(map);
 }
 
 size_t getRowSize(Map *map)
@@ -39,10 +48,16 @@ void setMapPositionValue(Map *map, Position position, int value)
 
 int isMapPositionEmpty(Map *map, Position position)
 {
-    // Use of calloc in initialiseMap means that map positions are initialised
-    // to 0, due to how the map generations will be implemented, it is most
-    // convenient that 0 represents an obstacle.
     return map->mapMatrix[convertMapRowToArray(map, position.y) *
                               getRowSize(map) +
                           position.x];
 }
+
+// Map generation functions.
+
+void generateBasicMap(Map *map)
+{
+    ;
+}
+
+void generateOtherMap(Map *map);

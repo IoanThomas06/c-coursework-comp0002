@@ -11,6 +11,7 @@ typedef struct Marker
 } Marker;
 
 Marker *initialiseMarker(Position, int);
+void deallocateMarker(Marker *marker);
 Position getMarkerPosition(Marker *);
 void pickUp(Marker *);
 void drop(Marker *, Position);
