@@ -6,6 +6,7 @@
 #include "allocations.h"
 #include "./drawapp/graphics.h"
 #include <stddef.h>
+#include <stdlib.h>
 
 #define ROBOT_VERTICES 3
 
@@ -84,18 +85,19 @@ static void delayDisplayUpdate(int milliseconds)
 
 static void drawColumns(Display *display, Map *map)
 {
-    for (int i = BORDER_WIDTH; i < display->columnCount + BORDER_WIDTH; i++)
+    for (int i = BORDER_WIDTH; i < display->columnCount + 2 * BORDER_WIDTH; i++)
     {
         drawLineToDisplay(display, i * SQUARE_WIDTH, 0, i * SQUARE_WIDTH,
-                          display->rowCount);
+                          (display->rowCount + BORDER_WIDTH) * SQUARE_WIDTH);
     }
 }
 
 static void drawRows(Display *display, Map *map)
 {
-    for (int i = BORDER_WIDTH; i < display->rowCount + BORDER_WIDTH; i++)
+    for (int i = BORDER_WIDTH; i < display->rowCount + 2 * BORDER_WIDTH; i++)
     {
-        drawLineToDisplay(display, 0, i * SQUARE_WIDTH, display->rowCount,
+        drawLineToDisplay(display, 0, i * SQUARE_WIDTH,
+                          (display->columnCount + BORDER_WIDTH) * SQUARE_WIDTH,
                           i * SQUARE_WIDTH);
     }
 }
@@ -169,11 +171,11 @@ static void generateTriangleRobotPoints(int squareWidth, int xPoints[],
 {
     for (size_t i = 0; i < 3; i++)
     {
-        xPoints[i] = i * squareWidth / 3;
+        xPoints[i] = i * squareWidth / 2;
     }
 
     yPoints[0] = yPoints[2] = 0;
-    yPoints[1] = squareWidth / 2;
+    yPoints[1] = squareWidth;
 }
 
 static void generateRobotPointSet(Display *display, Robot *robot,
@@ -217,7 +219,6 @@ Display *initialiseDisplay(size_t rowCount, size_t columnCount,
                            size_t pixelWidthOfGridSquare, size_t borderWidth)
 {
     Display *display = (Display *)checkedMalloc(sizeof(Display), "Display");
-
     display->rowCount = rowCount;
     display->columnCount = columnCount;
     display->pixelWidthOfGridSquare = pixelWidthOfGridSquare;

@@ -3,6 +3,8 @@
 #include "allocations.h"
 #include <stddef.h>
 #include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
 
 Map *initialiseMap(size_t rowSize, size_t columnSize,
                    void (*mapGenerationFunction)(Map *))
@@ -55,24 +57,39 @@ int isMapPositionEmpty(Map *map, Position position)
 
 // Map generation functions.
 
-// An empty map.
+// General map generation utilities.
 
-void generateEmptyMap(Map *map)
+typedef struct Range
 {
-    ;
+    // Inclusive.
+    size_t min;
+    // Exclusive.
+    size_t max;
+} Range;
+
+static size_t selectFromRange(Range range)
+{
+    srand(time(0));
+    return range.min + rand() % range.max;
 }
 
-/*
-    "2D Grid Map Generation for Deep-Learning-based Navigation Approaches"
-
-    Link: https://arxiv.org/pdf/2110.13242
-
-    Authors: Authors: Gabriel O. Flores-Aquino, Jheison Duvier Díaz Ortega,
-    Ricardo Yahir Almazan Arvizu, Raúl López Muñoz, O. Octavio Gutierrez-Frias,
-    J. Irving Vasquez-Gomez
-
-    My implementation is reduced in the variety of maps which can be produced.
-*/
+static int countMapObstacles(Map *map)
+{
+    int obstacleCount = 0;
+    for (size_t row = 0; row < getRowSize(map); row++)
+    {
+        for (size_t column = 0; column < getColumnSize(map); column++)
+        {
+            Position position = {.x = column,
+                                 .y = row};
+            if (!isMapPositionEmpty(map, position))
+            {
+                obstacleCount++;
+            }
+        }
+    }
+    return obstacleCount;
+}
 
 static void fillMap(Map *map)
 {
@@ -87,100 +104,32 @@ static void fillMap(Map *map)
     }
 }
 
-static void clearRoom(Map *map, Position seed, size_t roomWidth,
-                      size_t roomHeight)
+static Position getRandomPosition(Map *map)
 {
-    for (size_t row = seed.y - roomHeight / 2; row < seed.y + roomHeight / 2;
-         row++)
-    {
-        if (row >= 0 && row < getRowSize(map))
-        {
-            for (size_t column = seed.x - roomWidth;
-                 column < seed.x + roomWidth; column++)
-            {
-                if (column >= 0 && column < getColumnSize(map))
-                {
-                    Position position = {.x = column, .y = row};
-                    setMapPositionValue(map, position, 0);
-                }
-            }
-        }
-    }
+    Range rowRange = {.min = 0, .max = getRowSize(map)};
+    Range columnRange = {.min = 0, .max = getColumnSize(map)};
+    Position position = {.x = selectFromRange(columnRange),
+                         .y = selectFromRange(rowRange)};
+    return position;
 }
 
-static void seedRooms(Map *map, size_t numberOfRooms, size_t roomWidthLimit[],
-                      size_t roomHeightLimit[], Position seedPoints[])
+// Specific map generations.
+
+void generateEmptyMap(Map *map)
 {
-    for (size_t i = 0; i < numberOfRooms; i++)
-    {
-        Position seed = {.x = rand() % getColumnSize(map),
-                         .y = rand() % getRowSize(map)};
-        size_t roomWidth = rand() % (roomWidthLimit[1] + 1) + roomWidthLimit[0];
-        size_t roomHeight = rand() % (roomHeightLimit[1] + 1) +
-                            roomHeightLimit[0];
-        seedPoints[i] = seed;
-        clearRoom(map, seed, roomWidth, roomHeight);
-    }
+    ;
 }
 
-static void connectRooms(Map *map, Position roomA, Position roomB,
-                         size_t tunnelWidth)
+static Position eaterAgent(Map *map, size_t lifetime, Position initialPosition)
 {
-    for (size_t column = roomA.x; column <= roomB.x; column++)
-    {
-        for (size_t row = roomA.y - tunnelWidth / 2;
-             row < roomA.y + tunnelWidth; row++)
-        {
-            if (row >= 0 && row < getRowSize(map))
-            {
-                Position position = {.x = column, .y = row};
-                setMapPositionValue(map, position, 0);
-            }
-        }
-    }
-
-    for (size_t column = roomB.x - tunnelWidth / 2;
-         column <= roomB.x + tunnelWidth; column++)
-    {
-        if (column >= 0 && column < getColumnSize(map))
-        {
-            for (size_t row = roomA.y; row < roomB.y; row++)
-            {
-
-                Position position = {.x = column, .y = row};
-                setMapPositionValue(map, position, 0);
-            }
-        }
-    }
-}
-
-static void connectAllRooms(Map *map, size_t numberOfRooms,
-                            Position seedPoints[], size_t tunnelWidth)
-{
-    for (int i = 0; i < numberOfRooms - 1; i++)
-    {
-        connectRooms(map, seedPoints[i], seedPoints[i + 1], tunnelWidth);
-    }
 }
 
 void generateIrregularMap(Map *map)
 {
-    size_t numberOfRooms = 5;
-
-    // Below limit arrays in the form inclusive {min, max}.
-    size_t roomHeightLimit[2] = {
-        getRowSize(map) / numberOfRooms,
-        getRowSize(map) / numberOfRooms + 3};
-    size_t roomWidthLimit[2] = {
-        getColumnSize(map) / numberOfRooms,
-        getColumnSize(map) / numberOfRooms + 3};
-
-    size_t tunnelWidth = 1 + rand() % 3;
-    Position seedPoints[numberOfRooms];
-
     fillMap(map);
-
-    seedRooms(map, numberOfRooms, roomWidthLimit, roomHeightLimit, seedPoints);
-
-    connectAllRooms(map, numberOfRooms, seedPoints, tunnelWidth);
+    Position position = getRandomPosition(map);
+    do
+    {
+        position = (map, getRowSize(map) * getColumnSize(map), position);
+    } while (countMapObstacles(map) < getRowSize(map) * getColumnSize(map) / 3);
 }

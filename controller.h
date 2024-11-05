@@ -12,6 +12,7 @@ typedef struct Controller
     Robot *robot;
     Map *map;
     Marker **markers;
+    size_t numberOfMarkers;
     Display *display;
 } Controller;
 
