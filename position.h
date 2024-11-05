@@ -1,10 +1,12 @@
+#include <stddef.h>
+
 #ifndef POSITION_H
 #define POSITION_H
 
 typedef struct Position
 {
-    int x;
-    int y;
+    size_t x;
+    size_t y;
 } Position;
 
 int comparePositionValues(Position, Position);

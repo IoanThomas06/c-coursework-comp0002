@@ -8,13 +8,14 @@ typedef struct Map
 {
     size_t rowSize;
     size_t columnSize;
-    // Obstacles represented by 0.
+    // Obstacles represented by 1.
     int *mapMatrix;
 } Map;
 
 // Map utility functions.
 
-Map *initialiseMap(size_t, size_t, void (*mapGenerationFunction)(Map *));
+Map *initialiseMap(size_t, size_t,
+                   void (*mapGenerationFunction)(Map *));
 void deallocateMap(Map *map);
 size_t getRowSize(Map *);
 size_t getColumnSize(Map *);
@@ -23,7 +24,7 @@ int isMapPositionEmpty(Map *, Position);
 
 // Map generation functions.
 
-void generateBasicMap(Map *);
-void generateOtherMap(Map *);
+void generateEmptyMap(Map *);
+void generateIrregularMap(Map *);
 
 #endif

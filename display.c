@@ -119,7 +119,8 @@ static void drawObstacles(Display *display, Map *map)
         for (size_t column = 0; column < getColumnSize(map) + 2 * BORDER_WIDTH;
              column++)
         {
-            Position position = {column - BORDER_WIDTH, row - BORDER_WIDTH};
+            Position position = {.x = column - BORDER_WIDTH,
+                                 .y = row - BORDER_WIDTH};
 
             if (row < BORDER_WIDTH ||
                 row >= getRowSize(map) + BORDER_WIDTH ||

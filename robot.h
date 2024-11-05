@@ -1,6 +1,7 @@
 #include "position.h"
 #include "marker.h"
 #include "map.h"
+#include <stddef.h>
 
 #ifndef ROBOT_H
 #define ROBOT_H

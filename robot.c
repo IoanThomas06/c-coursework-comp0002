@@ -3,6 +3,7 @@
 #include "marker.h"
 #include "map.h"
 #include "allocations.h"
+#include <stddef.h>
 #include <stdlib.h>
 
 Robot *initialiseRobot(Position initialPosition, int initialDirection,
