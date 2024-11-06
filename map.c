@@ -7,18 +7,15 @@
 #include <time.h>
 #include <stdio.h>
 
+// Utilities: initialising and deallocating, getting member information.
+
 Map *initialiseMap(size_t rowSize, size_t columnSize,
                    void (*mapGenerationFunction)(Map *))
 {
     Map *map = (Map *)checkedMalloc(sizeof(Map), "Map");
 
-    map->mapMatrix = (int **)checkedMalloc(rowSize * sizeof(int *),
-                                           "'mapMatrix' row in Map");
-    for (size_t i = 0; i < rowSize; i++)
-    {
-        map->mapMatrix[i] = (int *)checkedCalloc(columnSize, sizeof(int),
-                                                 "'mapMatrix' column in Map");
-    }
+    map->mapMatrix = (int *)checkedCalloc(rowSize * columnSize, sizeof(int),
+                                          "'mapMatrix' in Map");
 
     map->rowSize = rowSize;
     map->columnSize = columnSize;
@@ -30,10 +27,6 @@ Map *initialiseMap(size_t rowSize, size_t columnSize,
 
 void deallocateMap(Map *map)
 {
-    for (size_t i = 0; i < getRowSize(map); i++)
-    {
-        free(map->mapMatrix[i]);
-    }
     free(map->mapMatrix);
 
     free(map);
@@ -48,6 +41,8 @@ size_t getColumnSize(Map *map)
 {
     return map->columnSize;
 }
+
+// Utilities: accessing elements in the map.
 
 static int isMapPositionValid(Map *map, Position position)
 {
@@ -76,18 +71,44 @@ static int convertMapRowToArray(Map *map, size_t row)
     return getRowSize(map) - row - 1;
 }
 
+static size_t formatMapIndex(Map *map, Position position)
+{
+    return convertMapRowToArray(map, position.y) * getColumnSize(map) +
+           position.x;
+}
+
 void setMapPositionValue(Map *map, Position position, int value)
 {
     checkPositionInMapError(map, position, "setMapPosition");
 
-    map->mapMatrix[convertMapRowToArray(map, position.y)][position.x] = value;
+    map->mapMatrix[formatMapIndex(map, position)] = value;
 }
 
 int isMapPositionEmpty(Map *map, Position position)
 {
     checkPositionInMapError(map, position, "isMapPositionEmpty");
 
-    return !map->mapMatrix[convertMapRowToArray(map, position.y)][position.x];
+    return !map->mapMatrix[formatMapIndex(map, position)];
+}
+
+// Utilities: getting map information.
+
+int countMapEmptySpace(Map *map)
+{
+    int emptyCount = 0;
+    for (size_t row = 0; row < getRowSize(map); row++)
+    {
+        for (size_t column = 0; column < getColumnSize(map); column++)
+        {
+            Position position = {.x = column,
+                                 .y = row};
+            if (isMapPositionEmpty(map, position))
+            {
+                emptyCount++;
+            }
+        }
+    }
+    return emptyCount;
 }
 
 // Map generation functions.
@@ -105,24 +126,6 @@ typedef struct Range
 static size_t selectFromRange(Range range)
 {
     return range.min + rand() % range.max;
-}
-
-static int countMapObstacles(Map *map)
-{
-    int obstacleCount = 0;
-    for (size_t row = 0; row < getRowSize(map); row++)
-    {
-        for (size_t column = 0; column < getColumnSize(map); column++)
-        {
-            Position position = {.x = column,
-                                 .y = row};
-            if (!isMapPositionEmpty(map, position))
-            {
-                obstacleCount++;
-            }
-        }
-    }
-    return obstacleCount;
 }
 
 static void fillMap(Map *map)
@@ -194,6 +197,11 @@ void generateEatenMap(Map *map)
 
     fillMap(map);
 
-    eaterAgent(map, 2 * getRowSize(map) * getColumnSize(map),
-               getRandomPosition(map));
+    Position position = getRandomPosition(map);
+    do
+    {
+        position = eaterAgent(map, 2 * getRowSize(map) * getColumnSize(map),
+                              position);
+    } while (countMapEmptySpace(map) <
+             getRowSize(map) * getColumnSize(map) / 3);
 }

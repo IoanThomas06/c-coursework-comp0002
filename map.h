@@ -9,7 +9,7 @@ typedef struct Map
     size_t rowSize;
     size_t columnSize;
     // Obstacles represented by 1.
-    int **mapMatrix;
+    int *mapMatrix;
 } Map;
 
 // Map utility functions.
@@ -21,13 +21,14 @@ size_t getRowSize(Map *);
 size_t getColumnSize(Map *);
 void setMapPositionValue(Map *, Position, int);
 int isMapPositionEmpty(Map *, Position);
+int countMapEmptySpace(Map *);
 
 /*
     Map generation functions.
-    All with signatures:
+    Shared function signature:
         - Return type: 'void'
         - Parameters: '1'
-        - Parameter type: 'Map *'
+        - Parameter types: 'Map *'
 */
 
 void generateEmptyMap(Map *);
