@@ -47,7 +47,7 @@ Controller *parseControllerArguments(size_t argc, char **argv)
         (argc > 4) ? atoi(argv[4]) : 5,
 
         // Map generation type.
-        (argc > 5 && strcmp(argv[5], "basic")) ? generateIrregularMap
+        (argc > 5 && strcmp(argv[5], "basic")) ? generateEatenMap
                                                : generateEmptyMap);
 }
 

@@ -1,6 +1,5 @@
 
 .vscode/settings.json
-drawapp/a.exe
-drawapp/test.c
 mapdump.txt
 *.o
+*.exe

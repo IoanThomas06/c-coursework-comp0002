@@ -1,23 +1,11 @@
 #include "position.h"
+#include "direction.h"
 #include "marker.h"
 #include "map.h"
 #include <stddef.h>
 
 #ifndef ROBOT_H
 #define ROBOT_H
-
-/*
-    The members represent the directional displacement of moving one unit in the
-    current direction.
-    For example:
-        {0, 1} represents the direction of North (upwards).
-        {-1, 0} represents the direction of West (leftwards).
-*/
-typedef struct DirectionVector
-{
-    int x;
-    int y;
-} DirectionVector;
 
 typedef struct Robot
 {
@@ -34,7 +22,6 @@ typedef struct Robot
 Robot *initialiseRobot(Position, int, size_t);
 void deallocateRobot(Robot *robot);
 DirectionVector getDirectionVector(Robot *);
-Position addDirectionToPosition(Position, DirectionVector);
 int getRotationalOffset(Robot *);
 
 // Robot control declarations.
