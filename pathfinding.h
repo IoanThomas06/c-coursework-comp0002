@@ -13,6 +13,6 @@ typedef struct Path
 } Path;
 
 Path *generatePath(Map *, Position, Position);
-Position getNextMove();
+Position getNextPosition(Path *);
 
 #endif

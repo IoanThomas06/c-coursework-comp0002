@@ -30,6 +30,11 @@ void deallocateRobot(Robot *robot)
     free(robot);
 }
 
+Position getRobotPosition(Robot *robot)
+{
+    return robot->position;
+}
+
 DirectionVector getDirectionVector(Robot *robot)
 {
     return generateDirectionVector(robot->neswDirection);

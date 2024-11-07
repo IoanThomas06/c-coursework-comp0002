@@ -1,21 +1,35 @@
 #include "direction.h"
 #include "position.h"
+#include <stdlib.h>
 
-DirectionVector generateDirectionVector(size_t neswDirection)
+DirectionVector generateDirectionVector(int neswDirection)
 {
     switch (neswDirection)
     {
     case 0:
-        return (DirectionVector){0, 1};
+        return (DirectionVector){.x = 0, .y = 1};
     case 1:
-        return (DirectionVector){1, 0};
+        return (DirectionVector){.x = 1, .y = 0};
     case 2:
-        return (DirectionVector){0, -1};
+        return (DirectionVector){.x = 0, .y = -1};
     case 3:
-        return (DirectionVector){-1, 0};
+        return (DirectionVector){.x = -1, .y = 0};
     default:
-        return (DirectionVector){0, 0};
+        return (DirectionVector){.x = 0, .y = 0};
     }
+}
+
+int convertDirectionVectorToNesw(DirectionVector directionVector)
+{
+    if (directionVector.x)
+    {
+        return (directionVector.x > 0) ? 1 : 3;
+    }
+    else if (directionVector.y)
+    {
+        return (directionVector.y > 0) ? 0 : 2;
+    }
+    return -1;
 }
 
 Position addDirectionToPosition(Position position, DirectionVector direction)
@@ -24,4 +38,18 @@ Position addDirectionToPosition(Position position, DirectionVector direction)
     position.y += direction.y;
 
     return position;
+}
+
+DirectionVector getDirectionBetweenPositions(Position positionA,
+                                             Position positionB)
+{
+    return (DirectionVector){.x = (positionB.x - positionA.x) % 1,
+                             .y = (positionB.y - positionA.y) % 1};
+}
+
+int getRelativeTurnBetweenNeswDirections(DirectionVector initialDirection,
+                                         DirectionVector targetDirection)
+{
+    return (initialDirection.y) ? initialDirection.y * targetDirection.x
+                                : -(initialDirection.x * targetDirection.y);
 }

@@ -1,12 +1,11 @@
 #include "position.h"
-#include <stddef.h>
 
 #ifndef DIRECTION_H
 #define DIRECTION_H
 
 /*
     The members represent the directional displacement of moving one unit in the
-    current direction.
+    current direction on a 2D Cartesian grid, with origin {x = 0, y = 0}.
     For example:
         {0, 1} represents the direction of North (upwards).
         {-1, 0} represents the direction of West (leftwards).
@@ -17,8 +16,11 @@ typedef struct DirectionVector
     int y;
 } DirectionVector;
 
-DirectionVector generateDirectionVector(size_t);
+DirectionVector generateDirectionVector(int);
+int convertDirectionVectorToNesw(DirectionVector);
 
 Position addDirectionToPosition(Position, DirectionVector);
+DirectionVector getDirectionBetweenPositions(Position, Position);
+int getRelativeTurnBetweenNeswDirections(DirectionVector, DirectionVector);
 
 #endif

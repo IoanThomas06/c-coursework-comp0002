@@ -8,6 +8,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include <stdio.h>
+
 #define ROBOT_VERTICES 3
 
 /*
@@ -142,13 +144,12 @@ static void swapXY(size_t i, int xPoints[], int yPoints[])
 {
     int temp = xPoints[i];
     xPoints[i] = yPoints[i];
-    yPoints[i] = xPoints[i];
+    yPoints[i] = temp;
 }
 
-static void rotatePointSets(int numberOfRotations, int numberOfPoints,
-                            int xPoints[], int yPoints[])
+static void rotatePointSets(int squareWidth, int numberOfRotations,
+                            int numberOfPoints, int xPoints[], int yPoints[])
 {
-
     // Handles any values < -1 or > 4 of rotation amount.
     // i.e. rotation amount will be 0, 1, 2, or 3.
     numberOfRotations = ((numberOfRotations % 4) + 4) % 4;
@@ -158,6 +159,7 @@ static void rotatePointSets(int numberOfRotations, int numberOfPoints,
         if (numberOfRotations > 1)
         {
             yPoints[i] *= -1;
+            yPoints[i] += squareWidth;
         }
         if (numberOfRotations % 2)
         {
@@ -179,17 +181,17 @@ static void generateTriangleRobotPoints(int squareWidth, int xPoints[],
 }
 
 static void generateRobotPointSet(Display *display, Robot *robot,
-                                  int squareWidth, int xPoints[], int yPoints[])
+                                  int xPoints[], int yPoints[])
 {
-    generateTriangleRobotPoints(squareWidth, xPoints, yPoints);
+    generateTriangleRobotPoints(SQUARE_WIDTH, xPoints, yPoints);
 
-    rotatePointSets(ROBOT_VERTICES, getRotationalOffset(robot), xPoints,
-                    yPoints);
+    rotatePointSets(SQUARE_WIDTH, getRotationalOffset(robot), ROBOT_VERTICES,
+                    xPoints, yPoints);
 
     for (size_t i = 0; i < ROBOT_VERTICES; i++)
     {
-        xPoints[i] += (robot->position.y + BORDER_WIDTH) * squareWidth;
-        yPoints[i] += (robot->position.x + BORDER_WIDTH) * squareWidth;
+        xPoints[i] += (robot->position.x + BORDER_WIDTH) * SQUARE_WIDTH;
+        yPoints[i] += (robot->position.y + BORDER_WIDTH) * SQUARE_WIDTH;
     }
 }
 
@@ -197,9 +199,7 @@ static void drawRobot(Display *display, Robot *robot)
 {
     int xPoints[ROBOT_VERTICES];
     int yPoints[ROBOT_VERTICES];
-
-    generateRobotPointSet(display, robot, SQUARE_WIDTH, xPoints, yPoints);
-
+    generateRobotPointSet(display, robot, xPoints, yPoints);
     fillPolygonOnDisplay(display, 3, xPoints, yPoints);
 }
 
@@ -258,6 +258,9 @@ void updateForeground(Display *display, Robot *robot, Marker *markers[],
     setDisplayDrawColour(0x00, 0x00, 0xFF);
     for (size_t i = 0; i < numberOfMarkers; i++)
     {
-        drawMarker(display, markers[i]);
+        if (isPlacedMarker(markers[i]))
+        {
+            drawMarker(display, markers[i]);
+        }
     }
 }

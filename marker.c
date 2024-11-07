@@ -6,7 +6,6 @@
 Marker *initialiseMarker(Position initialPosition, int isHome)
 {
     Marker *marker = (Marker *)checkedMalloc(sizeof(Marker), "Marker");
-
     marker->position = initialPosition;
     marker->isPlaced = 0;
     marker->isHome = (isHome) ? 1 : 0;

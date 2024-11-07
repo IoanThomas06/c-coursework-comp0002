@@ -6,6 +6,14 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+typedef struct Visited
+{
+    Position *list;
+    size_t count;
+} Visited;
+
+// Memory allocation functions.
+
 static Path *initialisePath(Map *map)
 {
     Path *path = (Path *)checkedMalloc(sizeof(Path), "Path");
@@ -24,11 +32,32 @@ static void deallocatePath(Path *path)
     free(path);
 }
 
-static int linearSearch(Position target, Position *positions, size_t count)
+static Visited *initialiseVisited(Map *map)
+{
+    Visited *visited = (Visited *)checkedMalloc(sizeof(Visited), "Visited");
+
+    visited->list = (Position *)checkedCalloc(countMapEmptySpace(map),
+                                              sizeof(Position),
+                                              "'list' in Visited");
+
+    visited->count = countMapEmptySpace(map);
+
+    return visited;
+}
+
+static void deallocateVisited(Visited *visited)
+{
+    free(visited->list);
+    free(visited);
+}
+
+// End of memory allocation functions.
+
+static int linearSearch(Position target, Visited *visited, size_t count)
 {
     for (--count; count >= 0; count--)
     {
-        if (comparePositionValues(target, positions[count]))
+        if (comparePositionValues(target, visited->list[count]))
         {
             return 1;
         }
@@ -41,40 +70,15 @@ static void pushToPath(Path *path, Position position)
     path->path[path->pathLength++] = position;
 }
 
-static void popFromPath(Path *path)
+static Position popFromPath(Path *path)
 {
-    path->pathLength--;
+    return path->path[--path->pathLength];
 }
 
 // BFS and related utilities.
 
-typedef struct Visited
-{
-    Position *visited;
-    size_t visitedCount;
-} Visited;
-
-static Visited *initialiseVisited(Map *map)
-{
-    Visited *visited = (Visited *)checkedMalloc(sizeof(Visited), "Visited");
-
-    visited->visited = (Position *)checkedCalloc(countMapEmptySpace(map),
-                                                 sizeof(Position),
-                                                 "'visited' in Visited");
-
-    visited->visitedCount = countMapEmptySpace(map);
-
-    return visited;
-}
-
-static void deallocateVisited(Visited *visited)
-{
-    free(visited->visited);
-    free(visited);
-}
-
-static Visited *breadthFirstSearch(Map *map, Path *path,
-                                   Position startPosition, Position target)
+static Visited *breadthFirstSearch(Map *map, Position startPosition,
+                                   Position target)
 {
     int qRear = 0;
     int qFront = 0;
@@ -86,20 +90,20 @@ static Visited *breadthFirstSearch(Map *map, Path *path,
 
     Position current;
 
-    visited->visited[visited->visitedCount++] = queue[++qRear] = startPosition;
+    visited->list[visited->count++] = queue[++qRear] = startPosition;
 
     while (qFront != qRear &&
            !comparePositionValues(current = queue[++qFront], target))
     {
-        for (size_t i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
-            Position adjacent = addDirectionToPosition(current,
-                                                       generateDirectionVector(i));
-            if (isMapPositionEmpty(map, adjacent) &&
-                !linearSearch(adjacent, visited, visited->visitedCount))
+            Position adjacent =
+                addDirectionToPosition(current, generateDirectionVector(i));
+            if (isMapPositionValid(map, adjacent) &&
+                isMapPositionEmpty(map, adjacent) &&
+                !linearSearch(adjacent, visited, visited->count))
             {
-                visited->visited[visited->visitedCount++] =
-                    queue[++qRear] = adjacent;
+                visited->list[visited->count++] = queue[++qRear] = adjacent;
             }
         }
     }
@@ -108,25 +112,53 @@ static Visited *breadthFirstSearch(Map *map, Path *path,
     return visited;
 }
 
-static void traceVisited(Visited *visited, Position target)
+static void traceVisited(Path *path, Visited *visited, Position target)
 {
-    Position current = visited->visited[visited->visitedCount];
+    Position current;
+    pushToPath(path, current = visited->list[--visited->count]);
+
     if (comparePositionValues(current, target))
     {
-        while (visited->visitedCount-- > 0)
+        while (visited->count-- > 0)
         {
-            // check for all directions added to current if it is equal to visited->visited[visited->count]
-            // (so use the for 0 to 3 like in bfs)
-            // if it is equal, then push to stack, else don't, also remember to push the target to the stack?
+            for (int i = 0; i < 4; i++)
+            {
+                DirectionVector nextDirection = generateDirectionVector(i);
+                Position adjacent = addDirectionToPosition(current,
+                                                           nextDirection);
+
+                if (comparePositionValues(visited->list[visited->count],
+                                          adjacent))
+                {
+                    pushToPath(path, current = adjacent);
+                }
+            }
         }
     }
+
+    deallocateVisited(visited);
 }
+
+// End of BFS.
 
 Path *generatePath(Map *map, Position startPosition, Position endPosition)
 {
     Path *path = initialisePath(map);
 
-    breadthFirstSearch(map, path, startPosition, endPosition);
+    traceVisited(path, breadthFirstSearch(map, startPosition, endPosition),
+                 endPosition);
 
     return path;
+}
+
+Position getNextPosition(Path *path)
+{
+    Position next = popFromPath(path);
+
+    if (path->pathLength = 0)
+    {
+        deallocatePath(path);
+    }
+
+    return next;
 }

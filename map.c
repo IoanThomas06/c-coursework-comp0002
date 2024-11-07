@@ -1,6 +1,7 @@
 #include "map.h"
 #include "position.h"
 #include "direction.h"
+#include "range.h"
 #include "allocations.h"
 #include <stddef.h>
 #include <stdlib.h>
@@ -44,7 +45,7 @@ size_t getColumnSize(Map *map)
 
 // Utilities: accessing elements in the map.
 
-static int isMapPositionValid(Map *map, Position position)
+int isMapPositionValid(Map *map, Position position)
 {
     if (position.y >= 0 && position.y < getRowSize(map) &&
         position.x >= 0 && position.x < getColumnSize(map))
@@ -111,22 +112,39 @@ int countMapEmptySpace(Map *map)
     return emptyCount;
 }
 
+static Position getRandomPosition(Map *map)
+{
+    Range rowRange = {.min = 0, .max = getRowSize(map)};
+    Range columnRange = {.min = 0, .max = getColumnSize(map)};
+    Position position = {.x = selectFromRange(columnRange),
+                         .y = selectFromRange(rowRange)};
+    return position;
+}
+
+Position getEmptyRandomPosition(Map *map)
+{
+    size_t emptyCount = 0;
+    Position emptyPositions[getRowSize(map) * getColumnSize(map)];
+
+    for (size_t row = 0; row < getRowSize(map); row++)
+    {
+        for (size_t column = 0; column < getColumnSize(map); column++)
+        {
+            Position position = {.x = column,
+                                 .y = row};
+            if (isMapPositionEmpty(map, position))
+            {
+                emptyPositions[emptyCount++] = position;
+            }
+        }
+    }
+
+    return emptyPositions[rand() % emptyCount];
+}
+
 // Map generation functions.
 
 // General map generation utilities.
-
-typedef struct Range
-{
-    // Inclusive.
-    size_t min;
-    // Exclusive.
-    size_t max;
-} Range;
-
-static size_t selectFromRange(Range range)
-{
-    return range.min + rand() % range.max;
-}
 
 static void fillMap(Map *map)
 {
@@ -139,20 +157,6 @@ static void fillMap(Map *map)
             setMapPositionValue(map, position, 1);
         }
     }
-}
-
-static Position getRandomPosition(Map *map)
-{
-    Range rowRange = {.min = 0, .max = getRowSize(map)};
-    Range columnRange = {.min = 0, .max = getColumnSize(map)};
-    Position position = {.x = selectFromRange(columnRange),
-                         .y = selectFromRange(rowRange)};
-    return position;
-}
-
-static DirectionVector getRandomDirection()
-{
-    return generateDirectionVector(rand() % 4);
 }
 
 static Position getRandomAdjacentPosition(Map *map, Position position)
@@ -177,7 +181,19 @@ void generateEmptyMap(Map *map)
     ;
 }
 
-// The 'eater algorithm', designed by me.
+/*
+    Eater Algorithm:
+        - Designed by me.
+        - Fills the map completely with obstacles.
+        - An 'eater' agent starts at a given position.
+        - The agent makes n random moves to new positions,
+          limited by it's lifetime.
+        - Every position the eater moves to (including the initial position) is
+          cleared of obstacles.
+        - If a given eater did not sufficiently clear the map, another starts
+          where the last terminated. This ensures all cleared positions are
+          connected.
+*/
 
 static Position eaterAgent(Map *map, size_t lifetime, Position position)
 {

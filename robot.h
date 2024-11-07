@@ -20,7 +20,8 @@ typedef struct Robot
 // Robot utility declarations.
 
 Robot *initialiseRobot(Position, int, size_t);
-void deallocateRobot(Robot *robot);
+void deallocateRobot(Robot *);
+Position getRobotPosition(Robot *);
 DirectionVector getDirectionVector(Robot *);
 int getRotationalOffset(Robot *);
 

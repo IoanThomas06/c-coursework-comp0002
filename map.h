@@ -19,9 +19,12 @@ Map *initialiseMap(size_t, size_t,
 void deallocateMap(Map *map);
 size_t getRowSize(Map *);
 size_t getColumnSize(Map *);
+int isMapPositionValid(Map *, Position);
 void setMapPositionValue(Map *, Position, int);
 int isMapPositionEmpty(Map *, Position);
 int countMapEmptySpace(Map *);
+
+Position getEmptyRandomPosition(Map *);
 
 /*
     Map generation functions.
