@@ -18,6 +18,8 @@ void *checkedMalloc(size_t size, char errorMessage[])
         return pointer;
     }
     raiseAllocationError(errorMessage);
+
+    return NULL;
 }
 
 void *checkedCalloc(size_t numberOfObjects, size_t size, char errorMessage[])
@@ -29,4 +31,6 @@ void *checkedCalloc(size_t numberOfObjects, size_t size, char errorMessage[])
         return pointer;
     }
     raiseAllocationError(errorMessage);
+
+    return NULL;
 }

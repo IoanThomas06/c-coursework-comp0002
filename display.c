@@ -87,7 +87,8 @@ static void delayDisplayUpdate(int milliseconds)
 
 static void drawColumns(Display *display, Map *map)
 {
-    for (int i = BORDER_WIDTH; i < display->columnCount + 2 * BORDER_WIDTH; i++)
+    for (size_t i = BORDER_WIDTH; i < display->columnCount + 2 * BORDER_WIDTH;
+         i++)
     {
         drawLineToDisplay(display, i * SQUARE_WIDTH, 0, i * SQUARE_WIDTH,
                           (display->rowCount + BORDER_WIDTH) * SQUARE_WIDTH);
@@ -96,7 +97,7 @@ static void drawColumns(Display *display, Map *map)
 
 static void drawRows(Display *display, Map *map)
 {
-    for (int i = BORDER_WIDTH; i < display->rowCount + 2 * BORDER_WIDTH; i++)
+    for (size_t i = BORDER_WIDTH; i < display->rowCount + 2 * BORDER_WIDTH; i++)
     {
         drawLineToDisplay(display, 0, i * SQUARE_WIDTH,
                           (display->columnCount + BORDER_WIDTH) * SQUARE_WIDTH,
@@ -106,6 +107,7 @@ static void drawRows(Display *display, Map *map)
 
 static void drawGrid(Display *display, Map *map)
 {
+    setDisplayDrawColour(0x00, 0x00, 0x00);
     drawColumns(display, map);
     drawRows(display, map);
 }
@@ -118,6 +120,8 @@ static void drawObstacle(Display *display, int row, int column)
 
 static void drawObstacles(Display *display, Map *map)
 {
+    setDisplayDrawColour(0xFF, 0x00, 0x00);
+
     for (size_t row = 0; row < getRowSize(map) + 2 * BORDER_WIDTH; row++)
     {
         for (size_t column = 0; column < getColumnSize(map) + 2 * BORDER_WIDTH;
@@ -197,14 +201,18 @@ static void generateRobotPointSet(Display *display, Robot *robot,
 
 static void drawRobot(Display *display, Robot *robot)
 {
+    setDisplayDrawColour(0x00, 0xFF, 0x00);
     int xPoints[ROBOT_VERTICES];
     int yPoints[ROBOT_VERTICES];
     generateRobotPointSet(display, robot, xPoints, yPoints);
-    fillPolygonOnDisplay(display, 3, xPoints, yPoints);
+    fillPolygonOnDisplay(display, ROBOT_VERTICES, xPoints, yPoints);
 }
 
 static void drawMarker(Display *display, Marker *marker)
 {
+    (isHomeMarker(marker)) ? setDisplayDrawColour(0x75, 0x3F, 0xEA)
+                           : setDisplayDrawColour(0x00, 0x00, 0xFF);
+
     fillRectOnDisplay(display,
                       (getMarkerPosition(marker).x + BORDER_WIDTH) *
                           SQUARE_WIDTH,
@@ -213,7 +221,19 @@ static void drawMarker(Display *display, Marker *marker)
                       SQUARE_WIDTH, SQUARE_WIDTH);
 }
 
-// Header function definitions.
+static void drawMarkers(Display *display, Marker *markers[],
+                        size_t numberOfMarkers)
+{
+    for (size_t i = 0; i < numberOfMarkers; i++)
+    {
+        if (isPlacedMarker(markers[i]))
+        {
+            drawMarker(display, markers[i]);
+        }
+    }
+}
+
+// Public function definitions.
 
 Display *initialiseDisplay(size_t rowCount, size_t columnCount,
                            size_t pixelWidthOfGridSquare, size_t borderWidth)
@@ -238,29 +258,19 @@ void drawBackground(Display *display, Map *map)
 {
     editDisplayBackground();
 
-    setDisplayDrawColour(0x00, 0x00, 0x00);
     drawGrid(display, map);
 
-    setDisplayDrawColour(0xFF, 0x00, 0x00);
     drawObstacles(display, map);
 }
 
 void updateForeground(Display *display, Robot *robot, Marker *markers[],
-                      int numberOfMarkers)
+                      size_t numberOfMarkers, int delayMilliseconds)
 {
-    delayDisplayUpdate(500);
+    delayDisplayUpdate(delayMilliseconds);
     editDisplayForeground();
     clear();
 
-    setDisplayDrawColour(0x00, 0xFF, 0x00);
-    drawRobot(display, robot);
+    drawMarkers(display, markers, numberOfMarkers);
 
-    setDisplayDrawColour(0x00, 0x00, 0xFF);
-    for (size_t i = 0; i < numberOfMarkers; i++)
-    {
-        if (isPlacedMarker(markers[i]))
-        {
-            drawMarker(display, markers[i]);
-        }
-    }
+    drawRobot(display, robot);
 }

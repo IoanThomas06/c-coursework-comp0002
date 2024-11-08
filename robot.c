@@ -5,7 +5,10 @@
 #include "map.h"
 #include "allocations.h"
 #include <stddef.h>
+#include <stdbool.h>
 #include <stdlib.h>
+
+// Utilities.
 
 Robot *initialiseRobot(Position initialPosition, int initialDirection,
                        size_t numberOfMarkers)
@@ -57,6 +60,10 @@ static void turn(Robot *robot, int relativeDirection)
                            4;
 }
 
+// End of utilities.
+
+// Robot control interface.
+
 void forward(Robot *robot)
 {
     robot->position = addDirectionToPosition(robot->position,
@@ -73,32 +80,29 @@ void right(Robot *robot)
     turn(robot, 1);
 }
 
-int atMarker(Robot *robot, Marker *markers[], size_t numberOfMarkers)
+bool atMarker(Robot *robot, Marker *markers[], size_t numberOfMarkers)
 {
     for (size_t i = 0; i < numberOfMarkers; i++)
     {
         if (comparePositionValues(robot->position, markers[i]->position))
         {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 
-int canMoveForward(Robot *robot, Map *map)
+bool canMoveForward(Robot *robot, Map *map)
 {
     Position nextPosition = addDirectionToPosition(robot->position,
                                                    getDirectionVector(robot));
 
-    if (nextPosition.x == -1 ||
-        nextPosition.x == getColumnSize(map) ||
-        nextPosition.y == -1 ||
-        nextPosition.y == getRowSize(map) ||
-        !isMapPositionEmpty(map, nextPosition))
+    if (isMapPositionValid(map, nextPosition) &&
+        isMapPositionEmpty(map, nextPosition))
     {
-        return 0;
+        return true;
     }
-    return 1;
+    return false;
 }
 
 void pickUpMarker(Robot *robot, Marker *markers[], size_t numberOfMarkers)
@@ -134,15 +138,17 @@ int markerCount(Robot *robot)
     return robot->markerCount;
 }
 
-int isAtHome(Robot *robot, Marker *markers[], size_t numberOfMarkers)
+bool atHome(Robot *robot, Marker *markers[], size_t numberOfMarkers)
 {
     for (size_t i = 0; i < numberOfMarkers; i++)
     {
         if (isHomeMarker(markers[i]) &&
             comparePositionValues(robot->position, markers[i]->position))
         {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
+
+// End of robot control interface.

@@ -2,13 +2,14 @@
 #include "position.h"
 #include "allocations.h"
 #include <stdlib.h>
+#include <stdbool.h>
 
-Marker *initialiseMarker(Position initialPosition, int isHome)
+Marker *initialiseMarker(Position initialPosition, bool isHome)
 {
     Marker *marker = (Marker *)checkedMalloc(sizeof(Marker), "Marker");
     marker->position = initialPosition;
-    marker->isPlaced = 0;
-    marker->isHome = (isHome) ? 1 : 0;
+    marker->isPlaced = true;
+    marker->isHome = isHome;
 
     return marker;
 }
@@ -25,21 +26,21 @@ Position getMarkerPosition(Marker *marker)
 
 void pickUp(Marker *marker)
 {
-    marker->isPlaced = 1;
+    marker->isPlaced = false;
 }
 
 void drop(Marker *marker, Position position)
 {
     marker->position = position;
-    marker->isPlaced = 0;
+    marker->isPlaced = true;
 }
 
-int isPlacedMarker(Marker *marker)
+bool isPlacedMarker(Marker *marker)
 {
     return marker->isPlaced;
 }
 
-int isHomeMarker(Marker *marker)
+bool isHomeMarker(Marker *marker)
 {
     return marker->isHome;
 }

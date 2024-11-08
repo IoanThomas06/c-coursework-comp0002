@@ -21,6 +21,6 @@ int convertDirectionVectorToNesw(DirectionVector);
 
 Position addDirectionToPosition(Position, DirectionVector);
 DirectionVector getDirectionBetweenPositions(Position, Position);
-int getRelativeTurnBetweenNeswDirections(DirectionVector, DirectionVector);
+int getRelativeTurnBetweenDirections(DirectionVector, DirectionVector);
 
 #endif

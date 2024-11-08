@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
+#include <stdbool.h>
+
+// Utilities.
 
 // Utilities: initialising and deallocating, getting member information.
 
@@ -15,8 +18,8 @@ Map *initialiseMap(size_t rowSize, size_t columnSize,
 {
     Map *map = (Map *)checkedMalloc(sizeof(Map), "Map");
 
-    map->mapMatrix = (int *)checkedCalloc(rowSize * columnSize, sizeof(int),
-                                          "'mapMatrix' in Map");
+    map->mapMatrix = (bool *)checkedCalloc(rowSize * columnSize, sizeof(bool),
+                                           "'mapMatrix' in Map");
 
     map->rowSize = rowSize;
     map->columnSize = columnSize;
@@ -47,12 +50,13 @@ size_t getColumnSize(Map *map)
 
 int isMapPositionValid(Map *map, Position position)
 {
-    if (position.y >= 0 && position.y < getRowSize(map) &&
-        position.x >= 0 && position.x < getColumnSize(map))
+    // Does not need to check >= 0, as position is implemented with members of
+    // size_t.
+    if (position.y < getRowSize(map) && position.x < getColumnSize(map))
     {
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
 static void checkPositionInMapError(Map *map, Position position,
@@ -61,7 +65,7 @@ static void checkPositionInMapError(Map *map, Position position,
     if (!isMapPositionValid(map, position))
     {
         printf("call: %s: Position out of map bounds.\n"
-               "Attempted to index row: %d column: %d",
+               "Attempted to index row: %zu column: %zu",
                callingFunction, position.y, position.x);
         exit(EXIT_FAILURE);
     }
@@ -78,11 +82,11 @@ static size_t formatMapIndex(Map *map, Position position)
            position.x;
 }
 
-void setMapPositionValue(Map *map, Position position, int value)
+void setMapPositionValue(Map *map, Position position, bool isObstacle)
 {
     checkPositionInMapError(map, position, "setMapPosition");
 
-    map->mapMatrix[formatMapIndex(map, position)] = value;
+    map->mapMatrix[formatMapIndex(map, position)] = isObstacle;
 }
 
 int isMapPositionEmpty(Map *map, Position position)
@@ -94,9 +98,9 @@ int isMapPositionEmpty(Map *map, Position position)
 
 // Utilities: getting map information.
 
-int countMapEmptySpace(Map *map)
+size_t countMapEmptySpace(Map *map)
 {
-    int emptyCount = 0;
+    size_t emptyCount = 0;
     for (size_t row = 0; row < getRowSize(map); row++)
     {
         for (size_t column = 0; column < getColumnSize(map); column++)
@@ -142,9 +146,11 @@ Position getEmptyRandomPosition(Map *map)
     return emptyPositions[rand() % emptyCount];
 }
 
-// Map generation functions.
+// End of utilities.
 
-// General map generation utilities.
+// Map generation functions and utilities.
+
+// Map generation utilities.
 
 static void fillMap(Map *map)
 {
@@ -154,7 +160,7 @@ static void fillMap(Map *map)
         {
             Position position = {.x = column,
                                  .y = row};
-            setMapPositionValue(map, position, 1);
+            setMapPositionValue(map, position, true);
         }
     }
 }
@@ -201,7 +207,7 @@ static Position eaterAgent(Map *map, size_t lifetime, Position position)
     {
         position = getRandomAdjacentPosition(map, position);
 
-        setMapPositionValue(map, position, 0);
+        setMapPositionValue(map, position, false);
     }
 
     return position;
@@ -209,8 +215,6 @@ static Position eaterAgent(Map *map, size_t lifetime, Position position)
 
 void generateEatenMap(Map *map)
 {
-    srand(time(NULL));
-
     fillMap(map);
 
     Position position = getRandomPosition(map);

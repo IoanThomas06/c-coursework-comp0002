@@ -9,10 +9,12 @@ typedef struct Path
 {
     size_t currentPoint;
     size_t pathLength;
-    Position *path;
+    Position *pathStack;
 } Path;
 
-Path *generatePath(Map *, Position, Position);
+Path *findPath(Map *, Position, Position);
+int getPathLength(Path *path);
+Position peekPath(Path *path);
 Position getNextPosition(Path *);
 
 #endif

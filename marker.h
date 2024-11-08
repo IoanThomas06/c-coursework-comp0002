@@ -1,4 +1,5 @@
 #include "position.h"
+#include <stdbool.h>
 
 #ifndef MARKER_H
 #define MARKER_H
@@ -6,16 +7,16 @@
 typedef struct Marker
 {
     Position position;
-    int isPlaced;
-    int isHome;
+    bool isPlaced;
+    bool isHome;
 } Marker;
 
-Marker *initialiseMarker(Position, int);
+Marker *initialiseMarker(Position, bool);
 void deallocateMarker(Marker *marker);
 Position getMarkerPosition(Marker *);
 void pickUp(Marker *);
 void drop(Marker *, Position);
-int isPlacedMarker(Marker *);
-int isHomeMarker(Marker *);
+bool isPlacedMarker(Marker *);
+bool isHomeMarker(Marker *);
 
 #endif

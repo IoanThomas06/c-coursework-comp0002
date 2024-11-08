@@ -2,6 +2,8 @@
 #include "position.h"
 #include <stdlib.h>
 
+#include <stdio.h>
+
 DirectionVector generateDirectionVector(int neswDirection)
 {
     switch (neswDirection)
@@ -43,13 +45,40 @@ Position addDirectionToPosition(Position position, DirectionVector direction)
 DirectionVector getDirectionBetweenPositions(Position positionA,
                                              Position positionB)
 {
-    return (DirectionVector){.x = (positionB.x - positionA.x) % 1,
-                             .y = (positionB.y - positionA.y) % 1};
+    DirectionVector direction = {.x = 0,
+                                 .y = 0};
+
+    int xDifference = positionA.x - positionB.x;
+    int yDifference = positionA.y - positionB.y;
+
+    if (abs(xDifference))
+    {
+        direction.x = (xDifference > 0) ? 1 : -1;
+    }
+
+    if (abs(yDifference))
+    {
+        direction.y = (yDifference > 0) ? 1 : -1;
+    }
+
+    return direction;
 }
 
-int getRelativeTurnBetweenNeswDirections(DirectionVector initialDirection,
-                                         DirectionVector targetDirection)
+int getRelativeTurnBetweenDirections(DirectionVector initialDirection,
+                                     DirectionVector targetDirection)
 {
+    if (initialDirection.y == targetDirection.y &&
+        initialDirection.x == targetDirection.x)
+    {
+        return 0;
+    }
+
+    if ((initialDirection.y && targetDirection.y) ||
+        (initialDirection.x && targetDirection.x))
+    {
+        return 2;
+    }
+
     return (initialDirection.y) ? initialDirection.y * targetDirection.x
                                 : -(initialDirection.x * targetDirection.y);
 }

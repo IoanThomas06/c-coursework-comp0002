@@ -3,6 +3,7 @@
 #include "marker.h"
 #include "map.h"
 #include <stddef.h>
+#include <stdbool.h>
 
 #ifndef ROBOT_H
 #define ROBOT_H
@@ -30,11 +31,11 @@ int getRotationalOffset(Robot *);
 void forward(Robot *);
 void left(Robot *);
 void right(Robot *);
-int atMarker(Robot *, Marker *[], size_t);
-int canMoveForward(Robot *, Map *);
+bool atMarker(Robot *, Marker *[], size_t);
+bool canMoveForward(Robot *, Map *);
 void pickUpMarker(Robot *, Marker *[], size_t);
 void dropMarker(Robot *, Marker *[], size_t);
 int markerCount(Robot *);
-int isAtHome(Robot *, Marker *[], size_t);
+bool atHome(Robot *, Marker *[], size_t);
 
 #endif

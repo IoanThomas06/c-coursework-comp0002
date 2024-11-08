@@ -1,5 +1,6 @@
 #include "position.h"
 #include <stddef.h>
+#include <stdbool.h>
 
 #ifndef MAP_H
 #define MAP_H
@@ -9,7 +10,7 @@ typedef struct Map
     size_t rowSize;
     size_t columnSize;
     // Obstacles represented by 1.
-    int *mapMatrix;
+    bool *mapMatrix;
 } Map;
 
 // Map utility functions.
@@ -20,9 +21,9 @@ void deallocateMap(Map *map);
 size_t getRowSize(Map *);
 size_t getColumnSize(Map *);
 int isMapPositionValid(Map *, Position);
-void setMapPositionValue(Map *, Position, int);
+void setMapPositionValue(Map *, Position, bool);
 int isMapPositionEmpty(Map *, Position);
-int countMapEmptySpace(Map *);
+size_t countMapEmptySpace(Map *);
 
 Position getEmptyRandomPosition(Map *);
 
