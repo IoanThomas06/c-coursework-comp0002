@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "./drawapp/graphics.h"
+#include "graphics.h"
 
 void drawLine(int x1, int x2, int x3, int x4)
 {

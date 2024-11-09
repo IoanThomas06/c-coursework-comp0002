@@ -2,8 +2,6 @@
 #include "position.h"
 #include <stdlib.h>
 
-#include <stdio.h>
-
 DirectionVector generateDirectionVector(int neswDirection)
 {
     switch (neswDirection)
@@ -21,25 +19,10 @@ DirectionVector generateDirectionVector(int neswDirection)
     }
 }
 
-int convertDirectionVectorToNesw(DirectionVector directionVector)
-{
-    if (directionVector.x)
-    {
-        return (directionVector.x > 0) ? 1 : 3;
-    }
-    else if (directionVector.y)
-    {
-        return (directionVector.y > 0) ? 0 : 2;
-    }
-    return -1;
-}
-
 Position addDirectionToPosition(Position position, DirectionVector direction)
 {
-    position.x += direction.x;
-    position.y += direction.y;
-
-    return position;
+    return (Position){.x = position.x + direction.x,
+                      .y = position.y + direction.y};
 }
 
 DirectionVector getDirectionBetweenPositions(Position positionA,

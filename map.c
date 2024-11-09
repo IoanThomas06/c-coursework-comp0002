@@ -9,7 +9,28 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-// Utilities.
+// Static type definitions.
+
+struct Map
+{
+    size_t rowSize;
+    size_t columnSize;
+    // Obstacles represented by true.
+    bool *mapMatrix;
+};
+
+// End of static type definitions.
+
+// Static declarations (does not include specific map generation utilities).
+
+static void checkPositionInMapError(Map *, Position, char[]);
+static int convertMapRowToArray(Map *, size_t);
+static size_t formatMapIndex(Map *, Position);
+static Position getRandomPosition(Map *);
+static void fillMap(Map *);
+static Position getRandomAdjacentPosition(Map *, Position);
+
+// End of static declarations.
 
 // Utilities: initialising and deallocating, getting member information.
 
@@ -148,8 +169,6 @@ Position getEmptyRandomPosition(Map *map)
 
 // End of utilities.
 
-// Map generation functions and utilities.
-
 // Map generation utilities.
 
 static void fillMap(Map *map)
@@ -180,6 +199,8 @@ static Position getRandomAdjacentPosition(Map *map, Position position)
     return tempPosition;
 }
 
+// End of map generation utilities.
+
 // Specific map generations.
 
 void generateEmptyMap(Map *map)
@@ -189,7 +210,8 @@ void generateEmptyMap(Map *map)
 
 /*
     Eater Algorithm:
-        - Designed by me.
+        - Designed by me, although I am unlikely to be the first to use this
+          concept.
         - Fills the map completely with obstacles.
         - An 'eater' agent starts at a given position.
         - The agent makes n random moves to new positions,
@@ -215,6 +237,8 @@ static Position eaterAgent(Map *map, size_t lifetime, Position position)
 
 void generateEatenMap(Map *map)
 {
+    srand(time(NULL));
+
     fillMap(map);
 
     Position position = getRandomPosition(map);
@@ -225,3 +249,5 @@ void generateEatenMap(Map *map)
     } while (countMapEmptySpace(map) <
              getRowSize(map) * getColumnSize(map) / 3);
 }
+
+// End of specific map generations.

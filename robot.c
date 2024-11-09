@@ -8,6 +8,26 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+// Static type definitions.
+
+struct Robot
+{
+    Position position;
+    // Maps North through to West directions to the values 0 through to 3
+    // respectively.
+    int neswDirection;
+    int markerCount;
+    Marker **markers;
+};
+
+// End of static type definitions.
+
+// Static declarations.
+
+static void turn(Robot *, int);
+
+// End of static declarations.
+
 // Utilities.
 
 Robot *initialiseRobot(Position initialPosition, int initialDirection,
@@ -55,9 +75,8 @@ static void turn(Robot *robot, int relativeDirection)
         'North' and vice versa.
         Also handles any < -1 or > 4 if the argument was not -1 or 1.
     */
-    robot->neswDirection = ((robot->neswDirection + relativeDirection) % 4 +
-                            4) %
-                           4;
+    robot->neswDirection =
+        ((getRotationalOffset(robot) + relativeDirection) % 4 + 4) % 4;
 }
 
 // End of utilities.
@@ -66,7 +85,7 @@ static void turn(Robot *robot, int relativeDirection)
 
 void forward(Robot *robot)
 {
-    robot->position = addDirectionToPosition(robot->position,
+    robot->position = addDirectionToPosition(getRobotPosition(robot),
                                              getDirectionVector(robot));
 }
 
@@ -84,7 +103,8 @@ bool atMarker(Robot *robot, Marker *markers[], size_t numberOfMarkers)
 {
     for (size_t i = 0; i < numberOfMarkers; i++)
     {
-        if (comparePositionValues(robot->position, markers[i]->position))
+        if (comparePositionValues(getRobotPosition(robot),
+                                  getMarkerPosition(markers[i])))
         {
             return true;
         }
@@ -94,7 +114,7 @@ bool atMarker(Robot *robot, Marker *markers[], size_t numberOfMarkers)
 
 bool canMoveForward(Robot *robot, Map *map)
 {
-    Position nextPosition = addDirectionToPosition(robot->position,
+    Position nextPosition = addDirectionToPosition(getRobotPosition(robot),
                                                    getDirectionVector(robot));
 
     if (isMapPositionValid(map, nextPosition) &&
@@ -109,7 +129,8 @@ void pickUpMarker(Robot *robot, Marker *markers[], size_t numberOfMarkers)
 {
     for (size_t i = 0; i < numberOfMarkers; i++)
     {
-        if (comparePositionValues(robot->position, markers[i]->position))
+        if (comparePositionValues(getRobotPosition(robot),
+                                  getMarkerPosition(markers[i])))
         {
             pickUp(markers[i]);
             robot->markers[i] = markers[i];
@@ -127,7 +148,7 @@ void dropMarker(Robot *robot, Marker *markers[],
 
     if (i != numberOfMarkers)
     {
-        drop(markers[i], robot->position);
+        drop(markers[i], getRobotPosition(robot));
         robot->markers[i] = NULL;
         robot->markerCount--;
     }
@@ -143,7 +164,8 @@ bool atHome(Robot *robot, Marker *markers[], size_t numberOfMarkers)
     for (size_t i = 0; i < numberOfMarkers; i++)
     {
         if (isHomeMarker(markers[i]) &&
-            comparePositionValues(robot->position, markers[i]->position))
+            comparePositionValues(getRobotPosition(robot),
+                                  getMarkerPosition(markers[i])))
         {
             return true;
         }

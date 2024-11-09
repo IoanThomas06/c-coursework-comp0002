@@ -12,20 +12,52 @@
 #include <string.h>
 #include <stdio.h>
 
-static bool checkMarkerPositionEquality(Controller *controller,
-                                        Position position,
-                                        size_t initialisedMarkerCount)
+#define EMPTY_MAP_ID ' '
+#define EATEN_MAP_ID 'e'
+
+// Static type definitions.
+
+struct Controller
+{
+    Robot *robot;
+    Map *map;
+    Marker **markers;
+    size_t numberOfMarkers;
+    Display *display;
+};
+
+// End of static type definitions.
+
+// Static declarations.
+
+static bool checkMarkerPositionExists(Controller *, Position, size_t);
+static Position getUniqueRandomPosition(Controller *, size_t);
+static void initialiseMarkers(Controller *);
+static void (*parseMapGeneration(char))(Map *);
+static int getTurnValue(Controller *, Position);
+static int getNextTurnValue(Controller *, Path *);
+static void parseTurnValue(Controller *, int);
+static void pickupIfAble(Controller *);
+static void followPath(Controller *, Path *);
+
+// End of static declarations.
+
+// Utilities for initialisation.
+
+static bool checkMarkerPositionExists(Controller *controller,
+                                      Position position,
+                                      size_t initialisedMarkerCount)
 {
     for (size_t i = 0; i < initialisedMarkerCount; i++)
     {
         if (comparePositionValues(getMarkerPosition(controller->markers[i]),
                                   position))
         {
-            return false;
+            return true;
         }
     }
 
-    return true;
+    return false;
 }
 
 static Position getUniqueRandomPosition(Controller *controller,
@@ -36,9 +68,9 @@ static Position getUniqueRandomPosition(Controller *controller,
     {
         position = getEmptyRandomPosition(controller->map);
     } while (comparePositionValues(getRobotPosition(controller->robot),
-                                   position) &&
-             checkMarkerPositionEquality(controller, position,
-                                         initialisedMarkerCount));
+                                   position) ||
+             checkMarkerPositionExists(controller, position,
+                                       initialisedMarkerCount));
 
     return position;
 }
@@ -79,13 +111,29 @@ Controller *initialiseController(size_t squarePixelWidth, size_t mapRows,
                                         rand() % 4,
                                         numberOfMarkers);
 
-    // Dependent on map and robot being allocated.
+    if (numberOfMarkers > countMapEmptySpace(controller->map) - 1)
+    {
+        numberOfMarkers = countMapEmptySpace(controller->map) - 1;
+    }
     controller->numberOfMarkers = numberOfMarkers;
+
+    // Dependent on map and robot being allocated.
     initialiseMarkers(controller);
 
     controller->display = initialiseDisplay(mapRows, mapColumns,
                                             squarePixelWidth, 1);
     return controller;
+}
+
+static void (*parseMapGeneration(char functionID))(Map *)
+{
+    switch (functionID)
+    {
+    case EATEN_MAP_ID:
+        return generateEatenMap;
+    default:
+        return generateEmptyMap;
+    }
 }
 
 Controller *parseControllerArguments(size_t argc, char **argv)
@@ -101,11 +149,11 @@ Controller *parseControllerArguments(size_t argc, char **argv)
         (argc > 3 && atoi(argv[3]) > 5) ? atoi(argv[3]) : 20,
 
         // Marker count.
-        (argc > 4 && atoi(argv[4]) > 0) ? atoi(argv[4]) : 5,
+        (argc > 4 && atoi(argv[4]) > 0) ? atoi(argv[4]) : 2,
 
         // Map generation type.
-        (argc > 5 && strcmp(argv[5], "basic")) ? generateEatenMap
-                                               : generateEmptyMap);
+        (argc > 5) ? parseMapGeneration(argv[5][0])
+                   : parseMapGeneration(EMPTY_MAP_ID));
 }
 
 void deallocateController(Controller *controller)
@@ -122,6 +170,8 @@ void deallocateController(Controller *controller)
 
     free(controller);
 }
+
+// End of utilities for initialisation.
 
 // Prerequisites for 'void run(Controller *)' function.
 
@@ -186,19 +236,17 @@ static void followPath(Controller *controller, Path *path)
         {
             forward(controller->robot);
         }
-        else
-        {
-            printf("Robot could not move forward.\n");
-        }
 
         pickupIfAble(controller);
 
         updateForeground(controller->display, controller->robot,
-                         controller->markers, controller->numberOfMarkers, 300);
+                         controller->markers, controller->numberOfMarkers, 200);
     }
 }
 
 // End of prerequisites for 'void run(Controller *)' function.
+
+// Run function.
 
 void run(Controller *controller)
 {
@@ -220,7 +268,9 @@ void run(Controller *controller)
 
             updateForeground(controller->display, controller->robot,
                              controller->markers, controller->numberOfMarkers,
-                             0);
+                             100);
         }
     }
 }
+
+// End of run function.

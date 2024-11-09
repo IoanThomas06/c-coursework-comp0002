@@ -8,13 +8,48 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include <stdio.h>
+// Static type definitions.
+
+struct Path
+{
+    size_t currentPoint;
+    size_t pathLength;
+    Position *pathStack;
+};
 
 typedef struct Visited
 {
     Position *stack;
     size_t count;
 } Visited;
+
+typedef struct Queue
+{
+    int rear;
+    int front;
+    Position *queue;
+} Queue;
+
+// End of static type definitions.
+
+// Static declarations.
+
+static Path *initialisePath(Map *);
+static void deallocatePath(Path *);
+static Visited *initialiseVisited(Map *);
+static void deallocateVisited(Visited *);
+static Queue *initialiseQueue(Map *);
+static void deallocateQueue(Queue *);
+
+static void pushToPath(Path *, Position);
+static Position popFromPath(Path *);
+
+static bool linearSearch(Position, Position *, size_t, size_t);
+static bool checkIsUnvisited(Visited *, Queue *, Position);
+static Visited *breadthFirstSearch(Map *, Position, Position);
+static void traceVisited(Path *, Visited *, Position, Position);
+
+// End of static declarations.
 
 // Memory allocation functions.
 
@@ -57,6 +92,26 @@ static void deallocateVisited(Visited *visited)
     free(visited);
 }
 
+static Queue *initialiseQueue(Map *map)
+{
+    Queue *queue = (Queue *)checkedMalloc(sizeof(Queue), "Visited");
+
+    queue->queue = (Position *)checkedCalloc(countMapEmptySpace(map),
+                                             sizeof(Position),
+                                             "'queue' in Queue");
+
+    queue->rear = -1;
+    queue->front = -1;
+
+    return queue;
+}
+
+static void deallocateQueue(Queue *queue)
+{
+    free(queue->queue);
+    free(queue);
+}
+
 // End of memory allocation functions.
 
 // Path utilities.
@@ -97,7 +152,7 @@ Position getNextPosition(Path *path)
 
 // End of Path utilities.
 
-// BFS and related utilities.
+// Breadth-first search and related utilities.
 
 static bool linearSearch(Position target, Position *list, size_t startIndex,
                          size_t count)
@@ -112,44 +167,51 @@ static bool linearSearch(Position target, Position *list, size_t startIndex,
     return false;
 }
 
+static bool checkIsValidMove(Map *map, Position position)
+{
+    return isMapPositionValid(map, position) &&
+           isMapPositionEmpty(map, position);
+}
+
+static bool checkIsUnvisited(Visited *visited, Queue *queue, Position next)
+{
+    return !linearSearch(next, visited->stack, 0, visited->count) &&
+           !linearSearch(next, queue->queue, queue->front,
+                         queue->rear - queue->front);
+}
+
 static Visited *breadthFirstSearch(Map *map, Position startPosition,
                                    Position target)
 {
-    int qRear = -1;
-    int qFront = -1;
-    Position *queue = (Position *)checkedCalloc(countMapEmptySpace(map),
-                                                sizeof(Position),
-                                                "'queue' in findPath");
-
+    Queue *queue = initialiseQueue(map);
     Visited *visited = initialiseVisited(map);
+
+    visited->stack[visited->count++] =
+        queue->queue[++queue->rear] = startPosition;
 
     Position current;
     bool hasVisitedTarget = false;
-
-    visited->stack[visited->count++] = queue[++qRear] = startPosition;
-
-    while (qFront != qRear && !hasVisitedTarget)
+    while (queue->front != queue->rear && !hasVisitedTarget)
     {
-        current = queue[++qFront];
+        current = queue->queue[++queue->front];
 
         for (int i = 0; i < 4; i++)
         {
             Position adjacent =
                 addDirectionToPosition(current, generateDirectionVector(i));
 
-            if (isMapPositionValid(map, adjacent) &&
-                isMapPositionEmpty(map, adjacent) &&
-                !linearSearch(adjacent, visited->stack, 0, visited->count) &&
-                !linearSearch(adjacent, queue, qFront, qRear - qFront) &&
+            if (checkIsValidMove(map, adjacent) &&
+                checkIsUnvisited(visited, queue, adjacent) &&
                 !hasVisitedTarget)
             {
-                visited->stack[visited->count++] = queue[++qRear] = adjacent;
+                visited->stack[visited->count++] =
+                    queue->queue[++queue->rear] = adjacent;
                 hasVisitedTarget = comparePositionValues(adjacent, target);
             }
         }
     }
 
-    free(queue);
+    deallocateQueue(queue);
     return visited;
 }
 
@@ -180,9 +242,10 @@ static void traceVisited(Path *path, Visited *visited, Position start,
     deallocateVisited(visited);
 }
 
-// End of BFS.
+// End of breadth-first search and related utilities.
 
 // Path creator.
+
 Path *findPath(Map *map, Position startPosition, Position endPosition)
 {
     Path *path = initialisePath(map);

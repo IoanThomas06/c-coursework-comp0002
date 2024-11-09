@@ -5,12 +5,7 @@
 #ifndef PATHFINDING_H
 #define PATHFINDING_H
 
-typedef struct Path
-{
-    size_t currentPoint;
-    size_t pathLength;
-    Position *pathStack;
-} Path;
+typedef struct Path Path;
 
 Path *findPath(Map *, Position, Position);
 int getPathLength(Path *path);

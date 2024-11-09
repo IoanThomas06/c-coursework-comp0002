@@ -6,13 +6,7 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-typedef struct Display
-{
-    size_t rowCount;
-    size_t columnCount;
-    size_t pixelWidthOfGridSquare;
-    size_t borderWidth;
-} Display;
+typedef struct Display Display;
 
 Display *initialiseDisplay(size_t, size_t, size_t, size_t);
 void deallocateDisplay(Display *display);

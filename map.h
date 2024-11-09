@@ -5,13 +5,7 @@
 #ifndef MAP_H
 #define MAP_H
 
-typedef struct Map
-{
-    size_t rowSize;
-    size_t columnSize;
-    // Obstacles represented by 1.
-    bool *mapMatrix;
-} Map;
+typedef struct Map Map;
 
 // Map utility functions.
 
@@ -30,9 +24,9 @@ Position getEmptyRandomPosition(Map *);
 /*
     Map generation functions.
     Shared function signature:
-        - Return type: 'void'
-        - Parameters: '1'
-        - Parameter types: 'Map *'
+        - Return type: void
+        - Parameters: 1
+        - Parameter types: Map *
 */
 
 void generateEmptyMap(Map *);

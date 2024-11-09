@@ -4,6 +4,19 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+// Static type definitions.
+
+struct Marker
+{
+    Position position;
+    bool isPlaced;
+    bool isHome;
+};
+
+// End of static type definitions.
+
+// Utilities.
+
 Marker *initialiseMarker(Position initialPosition, bool isHome)
 {
     Marker *marker = (Marker *)checkedMalloc(sizeof(Marker), "Marker");
@@ -44,3 +57,5 @@ bool isHomeMarker(Marker *marker)
 {
     return marker->isHome;
 }
+
+// End of utilities.

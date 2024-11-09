@@ -7,14 +7,7 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-typedef struct Controller
-{
-    Robot *robot;
-    Map *map;
-    Marker **markers;
-    size_t numberOfMarkers;
-    Display *display;
-} Controller;
+typedef struct Controller Controller;
 
 Controller *initialiseController(size_t, size_t, size_t, size_t,
                                  void (*mapGenerationFunction)(Map *));

@@ -4,7 +4,7 @@
 #include "map.h"
 #include "position.h"
 #include "allocations.h"
-#include "./drawapp/graphics.h"
+#include "graphics.h"
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -21,6 +21,50 @@
 #define SQUARE_WIDTH display->pixelWidthOfGridSquare
 #define WINDOW_WIDTH (display->columnCount + 2 * BORDER_WIDTH) * SQUARE_WIDTH
 #define WINDOW_HEIGHT (display->rowCount + 2 * BORDER_WIDTH) * SQUARE_WIDTH
+
+// Static type definitions.
+
+struct Display
+{
+    size_t rowCount;
+    size_t columnCount;
+    size_t pixelWidthOfGridSquare;
+    size_t borderWidth;
+};
+
+// End of static type definitions.
+
+// Static declarations.
+
+static int formatYCoordinate(Display *, int);
+static void drawLineToDisplay(Display *, int, int, int, int);
+static void fillRectOnDisplay(Display *, int, int, int, int);
+static void fillPolygonOnDisplay(Display *, size_t, int[], int[]);
+static void setDisplayWindowSize(Display *);
+static void editDisplayForeground();
+static void editDisplayBackground();
+static void setDisplayDrawColour(int, int, int);
+static void delayDisplayUpdate(int);
+
+// Static background functions.
+
+static void drawColumns(Display *, Map *);
+static void drawRows(Display *, Map *);
+static void drawGrid(Display *, Map *);
+static void drawObstacle(Display *, int, int);
+static void drawObstacles(Display *, Map *);
+
+// Static foreground functions, and relevant static utilities.
+
+static void swapXY(size_t, int[], int[]);
+static void rotatePointSets(int, int, int, int[], int[]);
+static void generateTriangleRobotPoints(int, int[], int[]);
+static void generateRobotPointSet(Display *, Robot *, int[], int[]);
+static void drawRobot(Display *, Robot *);
+static void drawMarker(Display *, Marker *);
+static void drawMarkers(Display *, Marker *[], size_t);
+
+// End of static declarations.
 
 // Static drawing general utility functions.
 
@@ -83,6 +127,8 @@ static void delayDisplayUpdate(int milliseconds)
     sleep(milliseconds);
 }
 
+// End of static drawing general utility functions.
+
 // Static background functions.
 
 static void drawColumns(Display *display, Map *map)
@@ -142,6 +188,8 @@ static void drawObstacles(Display *display, Map *map)
     }
 }
 
+// End of static background functions.
+
 // Static foreground functions, and relevant static utilities.
 
 static void swapXY(size_t i, int xPoints[], int yPoints[])
@@ -194,14 +242,13 @@ static void generateRobotPointSet(Display *display, Robot *robot,
 
     for (size_t i = 0; i < ROBOT_VERTICES; i++)
     {
-        xPoints[i] += (robot->position.x + BORDER_WIDTH) * SQUARE_WIDTH;
-        yPoints[i] += (robot->position.y + BORDER_WIDTH) * SQUARE_WIDTH;
+        xPoints[i] += (getRobotPosition(robot).x + BORDER_WIDTH) * SQUARE_WIDTH;
+        yPoints[i] += (getRobotPosition(robot).y + BORDER_WIDTH) * SQUARE_WIDTH;
     }
 }
 
 static void drawRobot(Display *display, Robot *robot)
 {
-    setDisplayDrawColour(0x00, 0xFF, 0x00);
     int xPoints[ROBOT_VERTICES];
     int yPoints[ROBOT_VERTICES];
     generateRobotPointSet(display, robot, xPoints, yPoints);
@@ -210,9 +257,6 @@ static void drawRobot(Display *display, Robot *robot)
 
 static void drawMarker(Display *display, Marker *marker)
 {
-    (isHomeMarker(marker)) ? setDisplayDrawColour(0x75, 0x3F, 0xEA)
-                           : setDisplayDrawColour(0x00, 0x00, 0xFF);
-
     fillRectOnDisplay(display,
                       (getMarkerPosition(marker).x + BORDER_WIDTH) *
                           SQUARE_WIDTH,
@@ -224,14 +268,26 @@ static void drawMarker(Display *display, Marker *marker)
 static void drawMarkers(Display *display, Marker *markers[],
                         size_t numberOfMarkers)
 {
+    Marker *home;
+
+    setDisplayDrawColour(0x00, 0x00, 0xFF);
     for (size_t i = 0; i < numberOfMarkers; i++)
     {
-        if (isPlacedMarker(markers[i]))
+        if (isHomeMarker(markers[i]))
+        {
+            home = markers[i];
+        }
+        else if (isPlacedMarker(markers[i]))
         {
             drawMarker(display, markers[i]);
         }
     }
+
+    setDisplayDrawColour(0x75, 0x3F, 0xEA);
+    drawMarker(display, home);
 }
+
+// End of static foreground functions, and relevant static utilities.
 
 // Public function definitions.
 
@@ -272,5 +328,8 @@ void updateForeground(Display *display, Robot *robot, Marker *markers[],
 
     drawMarkers(display, markers, numberOfMarkers);
 
+    setDisplayDrawColour(0x00, 0xFF, 0x00);
     drawRobot(display, robot);
 }
+
+// End of public function definitions.

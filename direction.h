@@ -17,7 +17,6 @@ typedef struct DirectionVector
 } DirectionVector;
 
 DirectionVector generateDirectionVector(int);
-int convertDirectionVectorToNesw(DirectionVector);
 
 Position addDirectionToPosition(Position, DirectionVector);
 DirectionVector getDirectionBetweenPositions(Position, Position);

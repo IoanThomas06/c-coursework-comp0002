@@ -4,12 +4,7 @@
 #ifndef MARKER_H
 #define MARKER_H
 
-typedef struct Marker
-{
-    Position position;
-    bool isPlaced;
-    bool isHome;
-} Marker;
+typedef struct Marker Marker;
 
 Marker *initialiseMarker(Position, bool);
 void deallocateMarker(Marker *marker);

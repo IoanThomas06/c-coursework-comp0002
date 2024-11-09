@@ -8,15 +8,7 @@
 #ifndef ROBOT_H
 #define ROBOT_H
 
-typedef struct Robot
-{
-    Position position;
-    // Maps North through to West directions to the values 0 through to 3
-    // respectively.
-    int neswDirection;
-    int markerCount;
-    Marker **markers;
-} Robot;
+typedef struct Robot Robot;
 
 // Robot utility declarations.
 
